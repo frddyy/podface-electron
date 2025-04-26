@@ -1,0 +1,13 @@
+<script>
+  const { ipcRenderer } = require("electron");
+
+  ipcRenderer.on("START_PROCESSING", (event, args) => {
+    const { data } = args;
+
+    // Kirim data ke main process untuk memulai pemrosesan di Python
+    ipcRenderer.send("START_BACKGROUND_VIA_MAIN", { number: data });
+  });
+
+  // Ketika background siap, beri tahu main process
+  ipcRenderer.send("BACKGROUND_READY");
+</script>

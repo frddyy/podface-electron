@@ -1,13 +1,49 @@
+/* Regular */
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("../public/assets/fonts/sf-pro-display-font/SF-Pro-Display-Regular.woff")
+    format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Medium */
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("../public/assets/fonts/sf-pro-display-font/sf-pro-text-medium.woff")
+    format("woff");
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* Semibold */
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("../public/assets/fonts/sf-pro-display-font/sf-pro-text-semibold.woff")
+    format("woff");
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* Bold */
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("../public/assets/fonts/sf-pro-display-font/sf-pro-text-bold.woff")
+    format("woff");
+  font-weight: 700;
+  font-style: normal;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    "SF Pro Display", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
