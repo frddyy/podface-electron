@@ -1,6 +1,6 @@
 import React from "react";
 import ReactPlayer from "react-player/lazy"; // Import ReactPlayer
-import { Box, Typography } from "@mui/material"; // Use MUI Box and Typography for styling
+import { Box } from "@mui/material"; // Use MUI Box and Typography for styling
 import { MusicNote } from "@mui/icons-material"; // Corrected import
 import { useTheme } from "@mui/material/styles";
 

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Box, Grid, Typography, LinearProgress } from "@mui/material";
 import { FileUpload as FileUploadIcon } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
@@ -10,35 +10,14 @@ import MeshPreviewField from "./MeshPreviewField"; // For mesh preview
 const UploadField = ({
   mode = "audio",
   file,
-  setFile,
-  setUploadProgress,
-  setIsUploading,
   uploadProgress,
   isUploading,
   onOpenFileDialog, // Added prop to open file dialog
 }) => {
   const theme = useTheme();
 
-  // Simulate file upload progress
-  const simulateFileUpload = (file) => {
-    const totalFileSize = file.size;
-    let uploadedSize = 0;
-
-    const uploadInterval = setInterval(() => {
-      if (uploadedSize < totalFileSize) {
-        uploadedSize += totalFileSize * 0.05; // Simulate 5% progress each step
-        const progress = Math.min((uploadedSize / totalFileSize) * 100, 100);
-        setUploadProgress(progress);
-      } else {
-        clearInterval(uploadInterval);
-        setIsUploading(false); // Finish the upload and stop the simulation
-      }
-    }, 200); // Simulate a file upload interval
-  };
-
   const handleFileUpload = () => {
     onOpenFileDialog(); // Open file dialog using the passed handler
-    
   };
 
   return (

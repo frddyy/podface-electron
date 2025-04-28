@@ -5,17 +5,12 @@ import CustomField from "../components/CustomField"; // Import CustomField
 
 const ProcessAudioScreen = () => {
   const [file, setFile] = useState(null);  // Store file path
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [feedback, setFeedback] = useState(""); // To store feedback message
   const [separatedAudioFiles, setSeparatedAudioFiles] = useState({}); // Store paths for separated audio files
   const theme = useTheme();
 
   // Handle file remove
   const handleFileRemove = () => {
     setFile(null);
-    setUploadProgress(0);
-    setIsUploading(false);
   };
 
   // Open file dialog using ipcRenderer
@@ -42,7 +37,6 @@ const ProcessAudioScreen = () => {
       ipcRenderer.send("separate-audio", { audioPath });
 
       ipcRenderer.once("feedback", (event, data) => {
-        setFeedback(data.message);
         console.log("Feedback from Python:", data.message);
       });
 
@@ -85,10 +79,6 @@ const ProcessAudioScreen = () => {
           labelText="Input Podcast Audio"
           file={file}
           setFile={setFile}
-          setUploadProgress={setUploadProgress}
-          setIsUploading={setIsUploading}
-          uploadProgress={uploadProgress}
-          isUploading={isUploading}
           onFileRemove={handleFileRemove}  // Optional: Pass the remove handler to CustomField
           isPreview={false} // Hide preview before file upload
           onOpenFileDialog={handleOpenFileDialog} // Pass the handler for opening file dialog
@@ -146,10 +136,6 @@ const ProcessAudioScreen = () => {
               labelText="Speaker 1"
               file={{ path: separatedAudioFiles.speaker1 }}
               setFile={setFile}
-              setUploadProgress={setUploadProgress}
-              setIsUploading={setIsUploading}
-              uploadProgress={uploadProgress}
-              isUploading={isUploading}
               isPreview={true} // Show preview section after file is uploaded
               sx={{ marginBottom: 2 }} // Add space between speakers
             />
@@ -161,10 +147,6 @@ const ProcessAudioScreen = () => {
               labelText="Speaker 2"
               file={{ path: separatedAudioFiles.speaker2 }}
               setFile={setFile}
-              setUploadProgress={setUploadProgress}
-              setIsUploading={setIsUploading}
-              uploadProgress={uploadProgress}
-              isUploading={isUploading}
               isPreview={true} // Show preview section after file is uploaded
             />
         </Box>

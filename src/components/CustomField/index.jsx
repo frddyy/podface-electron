@@ -15,10 +15,6 @@ const CustomField = ({
   isPreview = false,
   file,
   setFile,
-  setUploadProgress,
-  setIsUploading,
-  uploadProgress,
-  isUploading,
   onOpenFileDialog, // Added prop to handle opening the file dialog
 }) => {
   const theme = useTheme();
@@ -26,8 +22,6 @@ const CustomField = ({
   // Handle file removal
   const handleRemoveFile = () => {
     setFile(null);
-    setUploadProgress(0);
-    setIsUploading(false);
     if (onFileRemove) onFileRemove();
   };
 
@@ -97,10 +91,6 @@ const CustomField = ({
           mode={mode}
           file={file}
           setFile={setFile}
-          setUploadProgress={setUploadProgress}
-          setIsUploading={setIsUploading}
-          uploadProgress={uploadProgress}
-          isUploading={isUploading}
           onOpenFileDialog={onOpenFileDialog} // Pass the handler for file dialog
         />
       )}
