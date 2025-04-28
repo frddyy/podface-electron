@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Grid, Typography, IconButton } from "@mui/material";
 import DisabledByDefaultOutlinedIcon from "@mui/icons-material/DisabledByDefaultOutlined";
 import { useTheme } from "@mui/material/styles";
@@ -19,6 +19,7 @@ const CustomField = ({
   setIsUploading,
   uploadProgress,
   isUploading,
+  onOpenFileDialog, // Added prop to handle opening the file dialog
 }) => {
   const theme = useTheme();
 
@@ -100,6 +101,7 @@ const CustomField = ({
           setIsUploading={setIsUploading}
           uploadProgress={uploadProgress}
           isUploading={isUploading}
+          onOpenFileDialog={onOpenFileDialog} // Pass the handler for file dialog
         />
       )}
     </Grid>

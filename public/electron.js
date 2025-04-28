@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const { PythonShell } = require("python-shell");
 const path = require("path");
+const fs = require("fs");
 
 let mainWindow;
 
@@ -16,10 +17,11 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      //   preload: path.join(__dirname, "preload.js"),
+      // preload: path.join(__dirname, "preload.js"),
       contextIsolation: false,
       nodeIntegration: true, // Keamanan lebih baikwebgl: true, // Enable WebGL    },
       webgl: true,
+      webSecurity: false, // Disable web security to allow local file access
     },
   });
 
@@ -41,26 +43,66 @@ app.on("window-all-closed", () => {
   }
 });
 
-// Menangani permintaan untuk menjalankan script Python
-ipcMain.on("START_BACKGROUND_VIA_MAIN", (event, args) => {
-  const pythonScript = path.join(__dirname, "../scripts/factorial.py");
-
-  let pyshell = new PythonShell(pythonScript, {
-    pythonPath: "python3", // Atau 'python' tergantung konfigurasi Python Anda
-    args: [args.number],
+// Handle file open dialog
+ipcMain.on("open-file-dialog", async (event) => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
   });
 
-  // Menangani output dari Python
-  pyshell.on("message", (message) => {
-    console.log("Python output:", message);
-    mainWindow.webContents.send("MESSAGE_FROM_BACKGROUND_VIA_MAIN", message);
-  });
+  if (!result.canceled) {
+    const filePath = result.filePaths[0]; // Get the absolute file path
+    console.log("Selected file path: ", filePath);
+    event.reply("file-selected", { filePath }); // Send the absolute path to renderer
+  } else {
+    console.log("No file selected.");
+  }
+});
 
-  pyshell.on("stderr", (stderr) => {
-    console.error("Python error:", stderr);
-  });
+// Handle "separate-audio" event for processing audio
+ipcMain.on("separate-audio", (event, args) => {
+  console.log("Starting audio separation...");
+  const audioPath = args.audioPath;
+  console.log("Received audioPath in main process:", audioPath);
 
-  pyshell.on("close", () => {
-    console.log("Python process finished");
+  const options = {
+    pythonPath: '/home/daffaraihandika/TA/speechbrain/speechbrain_env/bin/python',  // Path to your Python executable
+    scriptPath: path.join(__dirname, '../scripts'),  // Path to your Python scripts folder
+    args: [audioPath],  // Pass the audio file path to the Python script
+  };
+
+  runPythonScript('separate_audio.py', options, "Audio separation completed", "Error executing audio separation:", event, (event) => {
+    // Kirimkan path hasil pemisahan audio ke renderer setelah proses selesai
+    const separatedAudioPaths = {
+      speaker1: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_1.wav',
+      speaker2: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_2.wav'
+    };
+    event.reply('audio-separation-complete', separatedAudioPaths); // Kirimkan path file ke renderer
   });
 });
+
+// Function to run the Python script and send feedback to the frontend
+function runPythonScript(scriptName, options, successMessage, errorMessage, event, nextFunction) {
+  const pyshell = new PythonShell(scriptName, options);
+
+  // Capture real-time logs from the Python script
+  pyshell.on('message', (message) => {
+    console.log(message);  // Log real-time output in the terminal
+  });
+
+  // Handle Python script results
+  pyshell.end((err, code, signal) => {
+    if (err) {
+      console.error(errorMessage, err);
+      event.reply(errorMessage, { error: err.message });
+    } else {
+      console.log(successMessage);
+      // Send the success message to the frontend
+      event.reply("feedback", { message: successMessage });
+
+      // Call the next function (if any) after processing
+      if (nextFunction) {
+        nextFunction(event);
+      }
+    }
+  });
+}

@@ -1,6 +1,5 @@
 import React, { useCallback } from "react";
 import { Box, Grid, Typography, LinearProgress } from "@mui/material";
-import { useDropzone } from "react-dropzone";
 import { FileUpload as FileUploadIcon } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import AudioPreviewField from "./AudioPreviewField"; // For audio preview
@@ -16,20 +15,9 @@ const UploadField = ({
   setIsUploading,
   uploadProgress,
   isUploading,
+  onOpenFileDialog, // Added prop to open file dialog
 }) => {
   const theme = useTheme();
-
-  // Handle file drop
-  const onDrop = useCallback(
-    (acceptedFiles) => {
-      const uploadedFile = acceptedFiles[0];
-      setFile(uploadedFile);
-      setUploadProgress(0);
-      setIsUploading(true); // Start uploading
-      simulateFileUpload(uploadedFile);
-    },
-    [setFile, setUploadProgress, setIsUploading]
-  );
 
   // Simulate file upload progress
   const simulateFileUpload = (file) => {
@@ -48,25 +36,16 @@ const UploadField = ({
     }, 200); // Simulate a file upload interval
   };
 
-  // Configure the dropzone
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept:
-      mode === "audio"
-        ? "audio/*"
-        : mode === "image"
-        ? "image/*"
-        : mode === "video"
-        ? "video/*"
-        : "model/*", // Add model support
-  });
+  const handleFileUpload = () => {
+    onOpenFileDialog(); // Open file dialog using the passed handler
+    
+  };
 
   return (
     <>
       {/* Show the upload box only before file is uploaded */}
       {!file && !isUploading && (
         <Box
-          {...getRootProps()}
           sx={{
             border: "1px dashed #ccc",
             borderColor: theme.palette.neutral.dark,
@@ -77,12 +56,11 @@ const UploadField = ({
             flexDirection: "column",
             alignItems: "center",
             cursor: "pointer",
-            backgroundColor: isDragActive
-              ? theme.palette.background.light
-              : theme.palette.background.form,
+            backgroundColor: isUploading
+              ? theme.palette.background.form
+              : theme.palette.background.light,
           }}
         >
-          <input {...getInputProps()} />
           <Grid
             sx={{
               display: "flex",
@@ -108,7 +86,9 @@ const UploadField = ({
               Here
             </Typography>
             <Typography variant="body1">- or -</Typography>
-            <Typography variant="body1">Click to Upload</Typography>
+            <Typography variant="body1" onClick={handleFileUpload} style={{ cursor: 'pointer' }}>
+              Click to Upload
+            </Typography>
           </Grid>
         </Box>
       )}

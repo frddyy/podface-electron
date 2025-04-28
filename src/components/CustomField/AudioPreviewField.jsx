@@ -6,14 +6,19 @@ import { useTheme } from "@mui/material/styles";
 
 const AudioPreviewField = ({ file }) => {
   const theme = useTheme();
+  // Tambahkan "file://" jika belum ada pada path file
+  const fileUrl = file && file.path ? `file://${file.path}` : null;
+
+  // Pastikan file adalah objek yang valid
+  const isValidFile = file && typeof file.path === "string";
 
   return (
     <div style={{ width: "100%", height: "50px" }}>
       {/* Check if file is available */}
-      {file ? (
-        // Display the audio player if the file is available
+      {isValidFile ? (
+        // Display the audio player if the file is available and valid
         <ReactPlayer
-          url={URL.createObjectURL(file)} // Audio file URL
+          url={fileUrl}
           playing={true} // Start playing automatically
           controls={true} // Show controls
           width="100%" // Take full width of container
@@ -21,7 +26,7 @@ const AudioPreviewField = ({ file }) => {
           style={{ marginBottom: "15px" }}
         />
       ) : (
-        // Display an alternative box when no file is provided
+        // Display an alternative box when no valid file is provided
         <Box
           sx={{
             width: "100",
