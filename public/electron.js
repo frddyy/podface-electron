@@ -84,6 +84,10 @@ ipcMain.on("separate-audio", (event, args) => {
 ipcMain.on("voice-conversion", (event, args) => {
   console.log("Starting voice conversion with Seed-VC...");
 
+  // Path output dinamis untuk Speaker 1 dan Speaker 2
+  const speaker1Output = `/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_speaker_1.wav`;
+  const speaker2Output = `/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_speaker_2.wav`;
+
   const options = {
     pythonPath: '/home/daffaraihandika/TA/seed-vc/seed_env/bin/python',  // Path ke venv Python di dalam Seed-VC
     scriptPath: '/home/daffaraihandika/TA/seed-vc',  // Lokasi folder Seed-VC
@@ -99,9 +103,12 @@ ipcMain.on("voice-conversion", (event, args) => {
 
   // Menjalankan voice conversion dan memberikan feedback ke frontend
   runPythonScript('inference.py', options, "Voice conversion completed successfully!", "Error during voice conversion:", event, (event) => {
-    // Path hasil konversi yang akan dikirimkan ke renderer
-    const convertedAudioPath = `/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_${args.speaker}.wav`;
-    event.reply('voice-conversion-complete', { convertedAudioPath }); // Kirimkan path hasil konversi
+    // Kirimkan path hasil konversi untuk speaker 1 dan speaker 2
+    const convertedAudioPaths = {
+      speaker1: speaker1Output,  // Path untuk speaker 1
+      speaker2: speaker2Output   // Path untuk speaker 2
+    };
+    event.reply('voice-conversion-complete', { convertedAudioPaths }); // Kirimkan path hasil konversi
   });
 });
 

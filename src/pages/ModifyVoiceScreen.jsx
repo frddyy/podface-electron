@@ -71,7 +71,7 @@ const ModifyVoiceScreen = () => {
       // Mendengarkan feedback setelah konversi selesai
       ipcRenderer.once("voice-conversion-complete", (event, data) => {
         console.log("Conversion feedback:", data);
-        setConvertedFile1({ path: data.convertedAudioPath }); // Menyimpan path hasil konversi
+        setConvertedFile1({ path: data.convertedAudioPaths.speaker1 }); // Menyimpan path hasil konversi
       });
     }
   };
@@ -99,7 +99,7 @@ const ModifyVoiceScreen = () => {
       // Mendengarkan feedback setelah konversi selesai
       ipcRenderer.once("voice-conversion-complete", (event, data) => {
         console.log("Conversion feedback:", data);
-        setConvertedFile2({ path: data.convertedAudioPath }); // Menyimpan path hasil konversi
+        setConvertedFile2({ path: data.convertedAudioPaths.speaker2 }); // Menyimpan path hasil konversi
       });
     }
   };
