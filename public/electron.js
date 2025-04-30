@@ -100,7 +100,7 @@ ipcMain.on("voice-conversion", (event, args) => {
   // Menjalankan voice conversion dan memberikan feedback ke frontend
   runPythonScript('inference.py', options, "Voice conversion completed successfully!", "Error during voice conversion:", event, (event) => {
     // Path hasil konversi yang akan dikirimkan ke renderer
-    const convertedAudioPath = '/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_speaker_1.wav'; // Sesuaikan untuk speaker_2
+    const convertedAudioPath = `/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_${args.speaker}.wav`;
     event.reply('voice-conversion-complete', { convertedAudioPath }); // Kirimkan path hasil konversi
   });
 });
