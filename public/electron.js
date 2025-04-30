@@ -80,6 +80,31 @@ ipcMain.on("separate-audio", (event, args) => {
   });
 });
 
+// Fungsi untuk menjalankan voice conversion menggunakan Seed-VC
+ipcMain.on("voice-conversion", (event, args) => {
+  console.log("Starting voice conversion with Seed-VC...");
+
+  const options = {
+    pythonPath: '/home/daffaraihandika/TA/seed-vc/seed_env/bin/python',  // Path ke venv Python di dalam Seed-VC
+    scriptPath: '/home/daffaraihandika/TA/seed-vc',  // Lokasi folder Seed-VC
+    args: [
+      '--source', args.inputAudioPath,  // Path audio input untuk konversi
+      '--target', args.targetAudioPath,  // Path audio target untuk konversi
+      '--output', '/home/daffaraihandika/TA/podface-electron/speechbrain/output',
+      '--speaker', args.speaker,
+    ],
+    mode: 'text',
+    pythonOptions: ['-u'],
+  };
+
+  // Menjalankan voice conversion dan memberikan feedback ke frontend
+  runPythonScript('inference.py', options, "Voice conversion completed successfully!", "Error during voice conversion:", event, (event) => {
+    // Path hasil konversi yang akan dikirimkan ke renderer
+    const convertedAudioPath = '/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_speaker_1.wav'; // Sesuaikan untuk speaker_2
+    event.reply('voice-conversion-complete', { convertedAudioPath }); // Kirimkan path hasil konversi
+  });
+});
+
 // Function to run the Python script and send feedback to the frontend
 function runPythonScript(scriptName, options, successMessage, errorMessage, event, nextFunction) {
   const pyshell = new PythonShell(scriptName, options);

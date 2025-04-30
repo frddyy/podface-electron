@@ -19,10 +19,10 @@ const AudioPreviewField = ({ file }) => {
         // Display the audio player if the file is available and valid
         <ReactPlayer
           url={fileUrl}
-          playing={true} // Start playing automatically
+          playing={false} // Start playing automatically
           controls={true} // Show controls
           width="100%" // Take full width of container
-          height="50px" // Set fixed height for the player
+          height="100%" // Set fixed height for the player
           style={{ marginBottom: "15px" }}
         />
       ) : (

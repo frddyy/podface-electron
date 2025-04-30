@@ -30,7 +30,7 @@ const UploadField = ({
             borderColor: theme.palette.neutral.dark,
             borderRadius: theme.shape.borderRadius,
             width: "100%",
-            height: "100%",
+            height: "175px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

@@ -71,6 +71,7 @@ const ProcessAudioScreen = () => {
           gap: 2,
           minHeight: "50vh", // Allow height to adjust based on content
           width: "fit-content",
+          minWidth: "350px"
         }}
       >
         {/* CustomField for file selection */}
@@ -127,6 +128,7 @@ const ProcessAudioScreen = () => {
           flexDirection: "column",
           gap: 20, // Increased gap to avoid overlap
           minHeight: 0, // Allow height to adjust based on content
+          minWidth: "350px"
         }}
       >
         <Box sx={{ width: "100%", height: "auto" }}>
