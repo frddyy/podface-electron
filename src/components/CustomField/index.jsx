@@ -6,7 +6,8 @@ import UploadField from "./UploadField"; // Import the UploadField component
 import AudioPreviewField from "./AudioPreviewField"; // Import the preview component for audio
 import ImagePreviewField from "./ImagePreviewField"; // Import the preview component for image
 import VideoPreviewField from "./VideoPreviewField"; // Import the preview component for video
-import { MusicNote, Image, VideoLibrary } from "@mui/icons-material"; // Corrected import
+import MeshPreviewField from "./MeshPreviewField"; // Import the MeshPreviewField for 3D meshes
+import { MusicNote, Image, VideoLibrary, MoodOutlined } from "@mui/icons-material"; // Corrected import
 
 const CustomField = ({
   mode = "audio",
@@ -61,6 +62,8 @@ const CustomField = ({
             <Image />
           ) : mode === "video" ? (
             <VideoLibrary />
+          ) : mode === "3d" ? (
+            <MoodOutlined />
           ) : null}
           <Typography variant="body1">{labelText}</Typography>
         </Grid>
@@ -84,6 +87,8 @@ const CustomField = ({
           <ImagePreviewField file={file} />
         ) : mode === "video" ? (
           <VideoPreviewField file={file} />
+        ) : mode === "3d" ? (
+          <MeshPreviewField file={file} />
         ) : null
       ) : (
         // Show upload field if file isn't uploaded yet
