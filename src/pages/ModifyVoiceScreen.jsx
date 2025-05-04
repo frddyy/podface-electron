@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Grid, Typography, Divider, Switch, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField";
@@ -14,6 +14,7 @@ const ModifyVoiceScreen = () => {
     fileAudioReference2, setFileAudioReference2,
     convertedFile1, setConvertedFile1,
     convertedFile2, setConvertedFile2,
+    setFinalAudio
   } = useAudioContext(); // Ambil context dari AudioContext
 
   // Fungsi untuk menangani perubahan pada switch
@@ -105,6 +106,12 @@ const ModifyVoiceScreen = () => {
       });
     }
   };
+
+  // Menggunakan useEffect untuk memperbarui final audio setelah konversi selesai
+  useEffect(() => {
+    // Memperbarui final audio hanya jika sudah ada hasil konversi atau pemisahan
+    setFinalAudio();
+  }, [convertedFile1, convertedFile2, isConvertVoice1, isConvertVoice2, setFinalAudio]);
 
   return (
     <Grid

@@ -16,12 +16,20 @@ export const AudioProvider = ({ children }) => {
   const [convertedFile1, setConvertedFile1] = useState(null); // File hasil konversi Speaker 1
   const [convertedFile2, setConvertedFile2] = useState(null); // File hasil konversi Speaker 2
 
-  // Fungsi untuk set final audio berdasarkan apakah konversi suara dilakukan
-  const setFinalAudio = (convertedAudio1, separatedAudio1) => {
-    if (isConvertVoice1) {
-      setFinalAudio1(convertedAudio1); // Jika voice conversion diaktifkan
+  // Fungsi untuk menentukan final audio berdasarkan kondisi
+  const setFinalAudio = () => {
+    // Tentukan final audio untuk speaker 1
+    if (isConvertVoice1 && convertedFile1) {
+      setFinalAudio1(convertedFile1.path); // Gunakan hasil konversi untuk speaker 1
     } else {
-      setFinalAudio1(separatedAudio1); // Jika tidak, gunakan audio yang sudah dipisah
+      setFinalAudio1(separatedAudioFiles.speaker1); // Gunakan audio yang sudah dipisah
+    }
+
+    // Tentukan final audio untuk speaker 2
+    if (isConvertVoice2 && convertedFile2) {
+      setFinalAudio2(convertedFile2.path); // Gunakan hasil konversi untuk speaker 2
+    } else {
+      setFinalAudio2(separatedAudioFiles.speaker2); // Gunakan audio yang sudah dipisah
     }
   };
 

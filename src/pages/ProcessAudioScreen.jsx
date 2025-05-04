@@ -5,7 +5,7 @@ import CustomField from "../components/CustomField";
 import { useAudioContext } from "../context/AudioContext";
 
 const ProcessAudioScreen = () => {
-  const { fileAudioPodcast, setFileAudioPodcast, separatedAudioFiles, setSeparatedAudioFiles, setFinalAudio } = useAudioContext(); // Ambil context dari AudioContext
+  const { fileAudioPodcast, setFileAudioPodcast, separatedAudioFiles, setSeparatedAudioFiles } = useAudioContext(); // Ambil context dari AudioContext
   const theme = useTheme();
 
   // Handle file remove
@@ -46,8 +46,6 @@ const ProcessAudioScreen = () => {
           speaker1: data.speaker1,
           speaker2: data.speaker2,
         });
-
-        setFinalAudio(null, data.speaker1); // Pass separated audio for speaker 1
       });
     }
   };
