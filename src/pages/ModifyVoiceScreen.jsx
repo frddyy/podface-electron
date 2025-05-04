@@ -2,25 +2,27 @@ import React, { useState } from "react";
 import { Grid, Typography, Divider, Switch, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField";
+import { useAudioContext } from "../context/AudioContext";
 
 const ModifyVoiceScreen = () => {
   const theme = useTheme();
 
-  // State untuk kontrol Convert Voice untuk Speaker 1 dan Speaker 2
-  const [convertVoice1, setConvertVoice1] = useState(false);
-  const [convertVoice2, setConvertVoice2] = useState(false);
-  const [file1, setFile1] = useState(null); // Store file untuk Speaker 1
-  const [file2, setFile2] = useState(null); // Store file untuk Speaker 2
-  const [convertedFile1, setConvertedFile1] = useState(null); // Store file hasil konversi Speaker 1
-  const [convertedFile2, setConvertedFile2] = useState(null); // Store file hasil konversi Speaker 2
+  const {
+    isConvertVoice1, setIsConvertVoice1,
+    isConvertVoice2, setIsConvertVoice2,
+    fileAudioReference1, setFileAudioReference1,
+    fileAudioReference2, setFileAudioReference2,
+    convertedFile1, setConvertedFile1,
+    convertedFile2, setConvertedFile2,
+  } = useAudioContext(); // Ambil context dari AudioContext
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
-    setConvertVoice1(event.target.checked);
+    setIsConvertVoice1(event.target.checked);
   };
 
   const handleSwitchChange2 = (event) => {
-    setConvertVoice2(event.target.checked);
+    setIsConvertVoice2(event.target.checked);
   };
 
   // Fungsi untuk membuka file dialog dan memilih file audio
@@ -32,7 +34,7 @@ const ModifyVoiceScreen = () => {
     ipcRenderer.once("file-selected", (event, data) => {
       const audioURL = data.filePath; // Object URL received from main process
       console.log("Received audio URL: ", audioURL);
-      setFile1({ path: audioURL });
+      setFileAudioReference1({ path: audioURL });
     });
   };
 
@@ -44,7 +46,7 @@ const ModifyVoiceScreen = () => {
     ipcRenderer.once("file-selected", (event, data) => {
       const audioURL = data.filePath; // Object URL received from main process
       console.log("Received audio URL: ", audioURL);
-      setFile2({ path: audioURL });
+      setFileAudioReference2({ path: audioURL });
     });
   };
 
@@ -52,12 +54,12 @@ const ModifyVoiceScreen = () => {
   const handleApplyClick1 = () => {
     console.log("Applying voice conversion for Speaker 1...");
 
-    if (file1) {
+    if (fileAudioReference1) {
       const { ipcRenderer } = window.require("electron");
 
       // Path input (enhanced speaker audio) and target audio (from file dialog)
       const inputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_1.wav"; 
-      const targetAudioPath = file1.path;
+      const targetAudioPath = fileAudioReference1.path;
       const outputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_speaker_1.wav"; 
 
       // Mengirimkan informasi ke backend untuk menjalankan konversi suara
@@ -80,12 +82,12 @@ const ModifyVoiceScreen = () => {
   const handleApplyClick2 = () => {
     console.log("Applying voice conversion for Speaker 2...");
 
-    if (file2) {
+    if (fileAudioReference2) {
       const { ipcRenderer } = window.require("electron");
 
       // Path input (enhanced speaker audio) and target audio (from file dialog)
       const inputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_2.wav"; 
-      const targetAudioPath = file2.path;
+      const targetAudioPath = fileAudioReference2.path;
       const outputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/converted_speaker_2.wav"; 
 
       // Mengirimkan informasi ke backend untuk menjalankan konversi suara
@@ -151,12 +153,12 @@ const ModifyVoiceScreen = () => {
             </Grid>
             <Grid item xs={6}>
               <Switch
-                checked={convertVoice1}
+                checked={isConvertVoice1}
                 onChange={handleSwitchChange1}
                 color="primary"
                 sx={{
                   "& .MuiSwitch-track": {
-                    backgroundColor: convertVoice1 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
+                    backgroundColor: isConvertVoice1 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
                   },
                   "& .MuiSwitch-thumb": {
                     backgroundColor: theme.palette.neutral.white, // White color for the thumb
@@ -167,21 +169,21 @@ const ModifyVoiceScreen = () => {
           </Grid>
 
           {/* If Speaker 1's switch is on, show CustomField for input audio */}
-          {convertVoice1 && (
+          {isConvertVoice1 && (
             <CustomField
               mode="audio"
               labelText="Input Reference Voice"
-              file={file1}
-              setFile={setFile1}
+              file={fileAudioReference1}
+              setFile={setFileAudioReference1}
               onOpenFileDialog={handleOpenFileDialog1} // Handle file dialog
               isPreview={false} // Since this is an input file, not a preview
             />
           )}
 
           {/* Apply Button for Speaker 1 */}
-          {convertVoice1 && (
+          {isConvertVoice1 && (
             <Button
-              variant={file1 ? "contained" : "outlined"} // Change the variant based on file state
+              variant={fileAudioReference1 ? "contained" : "outlined"} // Change the variant based on file state
               color="primary"
               sx={{
                 marginBottom: 2,
@@ -196,7 +198,7 @@ const ModifyVoiceScreen = () => {
                   opacity: 0.5
                 },
               }}
-              disabled={!file1} // Disable button if no file is uploaded
+              disabled={!fileAudioReference1} // Disable button if no file is uploaded
               onClick={handleApplyClick1}
             >
               Apply
@@ -204,7 +206,7 @@ const ModifyVoiceScreen = () => {
           )}
 
           {/* CustomField to show the converted audio after Apply */}
-          {convertVoice1 && (
+          {isConvertVoice1 && (
             <CustomField
               mode="audio"
               labelText="Converted Speaker 1 Voice"
@@ -263,12 +265,12 @@ const ModifyVoiceScreen = () => {
             </Grid>
             <Grid item xs={6}>
               <Switch
-                checked={convertVoice2}
+                checked={isConvertVoice2}
                 onChange={handleSwitchChange2}
                 color="primary"
                 sx={{
                   "& .MuiSwitch-track": {
-                    backgroundColor: convertVoice2 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
+                    backgroundColor: isConvertVoice2 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
                   },
                   "& .MuiSwitch-thumb": {
                     backgroundColor: theme.palette.neutral.white, // White color for the thumb
@@ -279,21 +281,21 @@ const ModifyVoiceScreen = () => {
           </Grid>
 
           {/* If Speaker 2's switch is on, show CustomField for input audio */}
-          {convertVoice2 && (
+          {isConvertVoice2 && (
             <CustomField
               mode="audio"
               labelText="Input Reference Voice"
-              file={file2}
-              setFile={setFile2}
+              file={fileAudioReference2}
+              setFile={setFileAudioReference2}
               onOpenFileDialog={handleOpenFileDialog2} // Handle file dialog
               isPreview={false} // Since this is an input file, not a preview
             />
           )}
 
           {/* Apply Button for Speaker 2 */}
-          {convertVoice2 && (
+          {isConvertVoice2 && (
             <Button
-              variant={file2 ? "contained" : "outlined"} // Change the variant based on file state
+              variant={fileAudioReference2 ? "contained" : "outlined"} // Change the variant based on file state
               color="primary"
               sx={{
                 marginBottom: 2,
@@ -308,7 +310,7 @@ const ModifyVoiceScreen = () => {
                   opacity: 0.5
                 },
               }}
-              disabled={!file2} // Disable button if no file is uploaded
+              disabled={!fileAudioReference2} // Disable button if no file is uploaded
               onClick={handleApplyClick2}
             >
               Apply
@@ -316,7 +318,7 @@ const ModifyVoiceScreen = () => {
           )}
 
           {/* CustomField to show the converted audio after Apply */}
-          {convertVoice2 && (
+          {isConvertVoice2 && (
             <CustomField
               mode="audio"
               labelText="Converted Speaker 2 Voice"

@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Box, Grid, Button, Typography, Divider } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import CustomField from "../components/CustomField"; // Import CustomField
+import CustomField from "../components/CustomField";
+import { useAudioContext } from "../context/AudioContext";
 
 const ProcessAudioScreen = () => {
-  const [file, setFile] = useState(null);  // Store file path
-  const [separatedAudioFiles, setSeparatedAudioFiles] = useState({}); // Store paths for separated audio files
+  const { fileAudioPodcast, setFileAudioPodcast, separatedAudioFiles, setSeparatedAudioFiles, setFinalAudio } = useAudioContext(); // Ambil context dari AudioContext
   const theme = useTheme();
 
   // Handle file remove
   const handleFileRemove = () => {
-    setFile(null);
+    setFileAudioPodcast(null);
   };
 
   // Open file dialog using ipcRenderer
@@ -22,14 +22,14 @@ const ProcessAudioScreen = () => {
     ipcRenderer.once("file-selected", (event, data) => {
       const audioURL = data.filePath; // Object URL received from main process
       console.log("Received audio URL: ", audioURL);
-      setFile({ path: audioURL });
+      setFileAudioPodcast({ path: audioURL });
     });
   };
 
   // Handle Apply button click
   const handleApplyClick = () => {
-    if (file) {
-      const audioPath = file.path;
+    if (fileAudioPodcast) {
+      const audioPath = fileAudioPodcast.path;
       console.log("audioPath: ", audioPath);
 
       const { ipcRenderer } = window.require("electron");
@@ -46,6 +46,8 @@ const ProcessAudioScreen = () => {
           speaker1: data.speaker1,
           speaker2: data.speaker2,
         });
+
+        setFinalAudio(null, data.speaker1); // Pass separated audio for speaker 1
       });
     }
   };
@@ -78,15 +80,15 @@ const ProcessAudioScreen = () => {
         <CustomField
           mode="audio"
           labelText="Input Podcast Audio"
-          file={file}
-          setFile={setFile}
+          file={fileAudioPodcast}
+          setFile={setFileAudioPodcast}
           onFileRemove={handleFileRemove}  // Optional: Pass the remove handler to CustomField
           isPreview={false} // Hide preview before file upload
           onOpenFileDialog={handleOpenFileDialog} // Pass the handler for opening file dialog
         />
         
         <Button
-          variant={file ? "contained" : "outlined"} // Change the variant based on file state
+          variant={fileAudioPodcast ? "contained" : "outlined"} // Change the variant based on file state
           color="primary"
           sx={{
             fontWeight: 600,
@@ -100,7 +102,7 @@ const ProcessAudioScreen = () => {
               opacity: 0.5
             },
           }}
-          disabled={!file} // Disable button if no file is uploaded
+          disabled={!fileAudioPodcast} // Disable button if no file is uploaded
           onClick={handleApplyClick}
         >
           Apply
@@ -137,7 +139,7 @@ const ProcessAudioScreen = () => {
               mode="audio"
               labelText="Speaker 1"
               file={{ path: separatedAudioFiles.speaker1 }}
-              setFile={setFile}
+              setFile={setSeparatedAudioFiles}
               isPreview={true} // Show preview section after file is uploaded
               sx={{ marginBottom: 2 }} // Add space between speakers
             />
@@ -148,7 +150,7 @@ const ProcessAudioScreen = () => {
               mode="audio"
               labelText="Speaker 2"
               file={{ path: separatedAudioFiles.speaker2 }}
-              setFile={setFile}
+              setFile={setSeparatedAudioFiles}
               isPreview={true} // Show preview section after file is uploaded
             />
         </Box>
