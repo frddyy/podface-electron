@@ -112,6 +112,38 @@ ipcMain.on("voice-conversion", (event, args) => {
   });
 });
 
+// Handle the "run-mica" event for face reconstruction
+ipcMain.on("run-mica", (event, args) => {
+  console.log("Starting MICA face reconstruction...");
+
+  const imageFolder = args.imageFolder;
+  const outputFolder = args.outputFolder;
+  const speaker = args.speaker;
+
+  const pretrainedModelPath = '/home/daffaraihandika/face-reconstruction/MICA/data/pretrained/mica.tar'; // Path to the pretrained MICA model
+
+  const options = {
+    pythonPath: '/home/daffaraihandika/miniconda3/envs/MICA/bin/python', // Path to Python executable in MICA environment
+    scriptPath: '/home/daffaraihandika/face-reconstruction/MICA',  // Path to MICA folder
+    args: [
+      '-i', imageFolder,  // Input image folder
+      '-o', outputFolder, // Output folder for 3D models
+      '-m', pretrainedModelPath, // Pretrained MICA model path
+      '-s', speaker  // Pass the speaker argument to Python script
+    ],
+    mode: 'text',
+    pythonOptions: ['-u'],
+  };
+
+  // Run the MICA face reconstruction Python script
+  runPythonScript("demo.py", options, "MICA processing completed successfully!", "Error during MICA processing:", event, (event) => {
+    console.log("MICA processing complete, starting postprocessing...");
+
+    // Call the face postprocessing function after MICA completion
+    runFacePostprocessing(event, outputFolder, speaker);  // Pass event, outputFolder, and speaker to face postprocessing
+  });
+});
+
 // Function to run the Python script and send feedback to the frontend
 function runPythonScript(scriptName, options, successMessage, errorMessage, event, nextFunction) {
   const pyshell = new PythonShell(scriptName, options);
@@ -136,5 +168,26 @@ function runPythonScript(scriptName, options, successMessage, errorMessage, even
         nextFunction(event);
       }
     }
+  });
+}
+
+// Fungsi untuk menjalankan face postprocessing
+function runFacePostprocessing(event, outputFolder, speaker) {
+  console.log("Starting face postprocessing...");
+
+  const micaMeshPath = path.join(outputFolder, `reconstructed_${speaker}.ply`);
+  const alignedMeshPath = path.join(outputFolder, `transformed_${speaker}.ply`);
+
+  const options = {
+    pythonPath: '/home/daffaraihandika/miniconda3/envs/MICA/bin/python',
+    scriptPath: path.join(__dirname, '../scripts'),
+    args: [micaMeshPath, alignedMeshPath],
+    mode: 'text',
+    pythonOptions: ['-u'],
+  };
+
+  runPythonScript('face_postprocessing.py', options, "Face postprocessing completed successfully!", "Error during face postprocessing:", event, () => {
+    console.log("Face postprocessing completed!");
+    event.reply("face-postprocessing-complete", { message: "Face postprocessing completed!" });
   });
 }

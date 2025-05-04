@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Typography, Divider, Switch, ToggleButton, ToggleButtonGroup, FormControl, FormLabel, Radio, RadioGroup, FormControlLabel } from "@mui/material";
+import { Grid, Typography, Divider, Switch, ToggleButton, ToggleButtonGroup, Radio, RadioGroup, FormControlLabel, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField";
 
@@ -17,9 +17,15 @@ const ChooseFaceScreen = () => {
   const [gender2, setGender2] = useState("female");
   const [template2, setTemplate2] = useState(1);
 
-  // State for managing uploaded file for the 3D model
-  const [file1, setFile1] = useState(null); // For Speaker 1
+  // State for handling files for Speaker 1
+  const [imageFile1, setImageFile1] = useState(null); // Image for Speaker 1
+  const [file1, setFile1] = useState(null); // For face reconstruction
+  const [templateFile1, setTemplateFile1] = useState(null); // For existing template 3D model
+
+  // State for handling files for Speaker 2
+  const [imageFile2, setImageFile2] = useState(null); // Image for Speaker 2
   const [file2, setFile2] = useState(null); // For Speaker 2
+  const [templateFile2, setTemplateFile2] = useState(null); // For existing template 3D model
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
@@ -50,11 +56,55 @@ const ChooseFaceScreen = () => {
     setTemplate2(Number(event.target.value));
   };
 
+  // Function to handle opening file dialog for Speaker 1 (Image upload)
+  const handleOpenImageDialog1 = () => {
+    const { ipcRenderer } = window.require("electron");
+
+    ipcRenderer.send("open-file-dialog");
+
+    ipcRenderer.once("file-selected", (event, data) => {
+      const imageURL = data.filePath;
+      console.log("Received image URL: ", imageURL);
+      setImageFile1({ path: imageURL });
+    });
+  };
+
+  // Function to handle Apply button click for Speaker 1
+  const handleApplyClick1 = () => {
+    console.log("Applying face model for Speaker 1...");
+
+    // Start the MICA face reconstruction process
+    const { ipcRenderer } = window.require("electron");
+
+    if (!imageFile1) {
+      console.error("No image file uploaded for Speaker 1.");
+      return;
+    }
+  
+    const imageFolder = imageFile1.path; 
+    const outputFolder = "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/";
+    const speaker = 'speaker_1'; 
+
+    // Send IPC message to Electron main process to run MICA face reconstruction
+    ipcRenderer.send("run-mica", {
+      imageFolder: imageFolder,  // Path to the image
+      outputFolder: outputFolder,  // Output folder
+      speaker: speaker  // Pass the speaker argument
+    });
+
+    // Mendengarkan feedback setelah konversi selesai
+    ipcRenderer.once("face-postprocessing-complete", (event, data) => {
+      // console.log("Face reconstruction feedback:", data);
+      console.log("Face reconstruction and postprocessing successfull");
+      setFile1({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_1.ply" });
+    });
+  };
+
   // Set default 3D model path when the "Use Existing Template?" switch is on for Speaker 1
   useEffect(() => {
     if (useTemplate1) {
       const modelPath = get3DModelPath(gender1, template1);
-      setFile1({ path: modelPath });
+      setTemplateFile1({ path: modelPath });
     }
   }, [useTemplate1, gender1, template1]);
 
@@ -62,7 +112,7 @@ const ChooseFaceScreen = () => {
   useEffect(() => {
     if (useTemplate2) {
       const modelPath = get3DModelPath(gender2, template2);
-      setFile2({ path: modelPath });
+      setTemplateFile2({ path: modelPath });
     }
   }, [useTemplate2, gender2, template2]);
 
@@ -134,64 +184,111 @@ const ChooseFaceScreen = () => {
           </Grid>
 
           {/* Speaker 1 Choose Template */}
-          {useTemplate1 && (
-            <Grid container alignItems="center" spacing={2}>
-              {/* Gender Selection with Toggle Button */}
-              <Grid item xs={6}>
-                <ToggleButtonGroup
-                  value={gender1}
-                  exclusive
-                  onChange={handleGenderChange1}
-                  aria-label="gender selection"
-                  sx={{
-                    "& .MuiToggleButton-root": {
-                      color: 'white', // White text color for both options
-                      border: `1px solid ${theme.palette.primary.main}`, // Border color for the buttons
-                    },
-                  }}
-                  fullWidth={false}
-                  size="small"
-                >
-                  <ToggleButton value="male" color="primary">Male</ToggleButton>
-                  <ToggleButton value="female" color="primary">Female</ToggleButton>
-                </ToggleButtonGroup>
-              </Grid>
+          {useTemplate1 ? (
+            <>            
+              <Grid container alignItems="center" spacing={2}>
+                {/* Gender Selection with Toggle Button */}
+                <Grid item xs={6}>
+                  <ToggleButtonGroup
+                    value={gender1}
+                    exclusive
+                    onChange={handleGenderChange1}
+                    aria-label="gender selection"
+                    sx={{
+                      "& .MuiToggleButton-root": {
+                        color: 'white', // White text color for both options
+                        border: `1px solid ${theme.palette.primary.main}`, // Border color for the buttons
+                      },
+                    }}
+                    fullWidth={false}
+                    size="small"
+                  >
+                    <ToggleButton value="male" color="primary">Male</ToggleButton>
+                    <ToggleButton value="female" color="primary">Female</ToggleButton>
+                  </ToggleButtonGroup>
+                </Grid>
 
-              {/* 3D Face Template Selection */}
-              <Grid item xs={6}>
-                <RadioGroup
-                  row
-                  value={template1}
-                  onChange={handleTemplateChange1}
-                >
-                  {[1, 2, 3, 4, 5].map((temp) => (
-                    <FormControlLabel
-                      key={temp}
-                      value={temp.toString()}
-                      control={<Radio />}
-                      label={temp}
-                      sx={{
-                        color: 'white',
-                        '& .MuiRadio-root': {
+                {/* 3D Face Template Selection */}
+                <Grid item xs={6}>
+                  <RadioGroup
+                    row
+                    value={template1}
+                    onChange={handleTemplateChange1}
+                  >
+                    {[1, 2, 3, 4, 5].map((temp) => (
+                      <FormControlLabel
+                        key={temp}
+                        value={temp.toString()}
+                        control={<Radio />}
+                        label={temp}
+                        sx={{
                           color: 'white',
-                        }
-                      }}
-                    />
-                  ))}
-                </RadioGroup>
+                          '& .MuiRadio-root': {
+                            color: 'white',
+                          }
+                        }}
+                      />
+                    ))}
+                  </RadioGroup>
+                </Grid>
               </Grid>
-            </Grid>
-          )}
 
-          {/* Show the 3D Mesh Preview if Use Existing Template is enabled */}
-          {useTemplate1 && (
-            <CustomField
-              mode="3d"
-              labelText="3D Face Model"
-              file={file1}
-              setFile={setFile1}
-              isPreview={true} // Show preview
-            />
+              <CustomField
+                mode="3d"
+                labelText="3D Face Model"
+                file={templateFile1}
+                setFile={setTemplateFile1}
+                isPreview={true} // Show preview
+              />
+            </>
+          ) : (
+            <>
+              <Grid container spacing={2}>
+                {/* Left side: Input Image */}
+                <Grid item xs={6}>
+                  <CustomField
+                    mode="image"
+                    labelText="Input Image"
+                    file={imageFile1}
+                    setFile={setImageFile1}
+                    onOpenFileDialog={handleOpenImageDialog1}
+                    isPreview={false} // No preview for image
+                  />
+                </Grid>
+
+                {/* Right side: Reconstructed 3D Face Model */}
+                <Grid item xs={6}>
+                  {/* This is shown if the user is not using the template */}
+                  {!useTemplate1 && file1 && (
+                    <CustomField
+                      mode="3d"
+                      labelText="Reconstructed 3D Face Model"
+                      file={file1}
+                      setFile={setFile1}
+                      isPreview={true} // Show preview
+                    />
+                  )}
+                </Grid>
+              </Grid>
+
+              {/* Button Apply below the image and 3D model */}
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{
+                  fontWeight: 600,
+                  textTransform: "none",
+                  maxWidth: 100,
+                  alignSelf: "flex-end", // Align to the right
+                  marginTop: 2 // Optional: space between components
+                }}
+                disabled={!imageFile1} // Disable button if no image is uploaded
+                onClick={handleApplyClick1}
+              >
+                Apply
+              </Button>
+            </>
+
           )}
         </Grid>
       </Grid>
@@ -261,63 +358,62 @@ const ChooseFaceScreen = () => {
 
           {/* Speaker 2 Choose Template */}
           {useTemplate2 && (
-            <Grid container alignItems="center" spacing={2}>
-              {/* Gender Selection with Toggle Button */}
-              <Grid item xs={6}>
-                <ToggleButtonGroup
-                  value={gender2}
-                  exclusive
-                  onChange={handleGenderChange2}
-                  aria-label="gender selection"
-                  sx={{
-                    "& .MuiToggleButton-root": {
-                      color: 'white', // White text color for both options
-                      border: `1px solid ${theme.palette.primary.main}`, // Border color for the buttons
-                    },
-                  }}
-                  fullWidth={false}
-                  size="small"
-                >
-                  <ToggleButton value="male" color="primary">Male</ToggleButton>
-                  <ToggleButton value="female" color="primary">Female</ToggleButton>
-                </ToggleButtonGroup>
-              </Grid>
+            <>
+              <Grid container alignItems="center" spacing={2}>
+                {/* Gender Selection with Toggle Button */}
+                <Grid item xs={6}>
+                  <ToggleButtonGroup
+                    value={gender2}
+                    exclusive
+                    onChange={handleGenderChange2}
+                    aria-label="gender selection"
+                    sx={{
+                      "& .MuiToggleButton-root": {
+                        color: 'white', // White text color for both options
+                        border: `1px solid ${theme.palette.primary.main}`, // Border color for the buttons
+                      },
+                    }}
+                    fullWidth={false}
+                    size="small"
+                  >
+                    <ToggleButton value="male" color="primary">Male</ToggleButton>
+                    <ToggleButton value="female" color="primary">Female</ToggleButton>
+                  </ToggleButtonGroup>
+                </Grid>
 
-              {/* 3D Face Template Selection */}
-              <Grid item xs={6}>
-                <RadioGroup
-                  row
-                  value={template2}
-                  onChange={handleTemplateChange2}
-                >
-                  {[1, 2, 3, 4, 5].map((temp) => (
-                    <FormControlLabel
-                      key={temp}
-                      value={temp.toString()}
-                      control={<Radio />}
-                      label={temp}
-                      sx={{
-                        color: 'white',
-                        '& .MuiRadio-root': {
+                {/* 3D Face Template Selection */}
+                <Grid item xs={6}>
+                  <RadioGroup
+                    row
+                    value={template2}
+                    onChange={handleTemplateChange2}
+                  >
+                    {[1, 2, 3, 4, 5].map((temp) => (
+                      <FormControlLabel
+                        key={temp}
+                        value={temp.toString()}
+                        control={<Radio />}
+                        label={temp}
+                        sx={{
                           color: 'white',
-                        }
-                      }}
-                    />
-                  ))}
-                </RadioGroup>
+                          '& .MuiRadio-root': {
+                            color: 'white',
+                          }
+                        }}
+                      />
+                    ))}
+                  </RadioGroup>
+                </Grid>
               </Grid>
-            </Grid>
-          )}
 
-          {/* Show the 3D Mesh Preview if Use Existing Template is enabled */}
-          {useTemplate2 && (
-            <CustomField
-              mode="3d"
-              labelText="3D Face Model"
-              file={file2}
-              setFile={setFile2}
-              isPreview={true} // Show preview
-            />
+              <CustomField
+                mode="3d"
+                labelText="3D Face Model"
+                file={templateFile2}
+                setFile={setTemplateFile2}
+                isPreview={true} // Show preview
+              />
+            </>
           )}
         </Grid>
       </Grid>
