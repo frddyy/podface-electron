@@ -20,16 +20,16 @@ export const AudioProvider = ({ children }) => {
   const setFinalAudio = () => {
     // Tentukan final audio untuk speaker 1
     if (isConvertVoice1 && convertedFile1) {
-      setFinalAudio1(convertedFile1.path); // Gunakan hasil konversi untuk speaker 1
+      setFinalAudio1(convertedFile1); // Gunakan hasil konversi untuk speaker 1
     } else {
-      setFinalAudio1(separatedAudioFiles.speaker1); // Gunakan audio yang sudah dipisah
+      setFinalAudio1({ path: separatedAudioFiles.speaker1 }); // Gunakan audio yang sudah dipisah
     }
 
     // Tentukan final audio untuk speaker 2
     if (isConvertVoice2 && convertedFile2) {
-      setFinalAudio2(convertedFile2.path); // Gunakan hasil konversi untuk speaker 2
+      setFinalAudio2(convertedFile2); // Gunakan hasil konversi untuk speaker 2
     } else {
-      setFinalAudio2(separatedAudioFiles.speaker2); // Gunakan audio yang sudah dipisah
+      setFinalAudio2({ path: separatedAudioFiles.speaker2 }); // Gunakan audio yang sudah dipisah
     }
   };
 

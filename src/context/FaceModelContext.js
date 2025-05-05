@@ -72,6 +72,8 @@ export const FaceModelProvider = ({ children }) => {
         setTemplateFile2,
         finalFace1,
         finalFace2,
+        setFinalFace1,
+        setFinalFace2,
         setFinalFace,
       }}
     >
