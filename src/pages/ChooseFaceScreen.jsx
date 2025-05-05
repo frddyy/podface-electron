@@ -2,38 +2,34 @@ import React, { useState, useEffect } from "react";
 import { Grid, Typography, Divider, Switch, ToggleButton, ToggleButtonGroup, Radio, RadioGroup, FormControlLabel, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField";
+import { useFaceModelContext } from "../context/FaceModelContext"; 
 
 const ChooseFaceScreen = () => {
   const theme = useTheme();
 
-  // State untuk kontrol Use Existing Template untuk Speaker 1 dan Speaker 2
-  const [useTemplate1, setUseTemplate1] = useState(false);
-  const [useTemplate2, setUseTemplate2] = useState(false);
-
-  // State untuk pilihan gender dan template 3D
-  const [gender1, setGender1] = useState("male");
-  const [template1, setTemplate1] = useState(1);
-
-  const [gender2, setGender2] = useState("female");
-  const [template2, setTemplate2] = useState(1);
-
-  // State for handling files for Speaker 1
-  const [imageFile1, setImageFile1] = useState(null); // Image for Speaker 1
-  const [file1, setFile1] = useState(null); // For face reconstruction
-  const [templateFile1, setTemplateFile1] = useState(null); // For existing template 3D model
-
-  // State for handling files for Speaker 2
-  const [imageFile2, setImageFile2] = useState(null); // Image for Speaker 2
-  const [file2, setFile2] = useState(null); // For Speaker 2
-  const [templateFile2, setTemplateFile2] = useState(null); // For existing template 3D model
+  const {
+    isUseTemplate1, setIsUseTemplate1,
+    isUseTemplate2, setIsUseTemplate2,
+    gender1, setGender1,
+    template1, setTemplate1,
+    gender2, setGender2,
+    template2, setTemplate2,
+    imageFile1, setImageFile1,
+    reconstructedFile1, setReconstructedFile1,
+    templateFile1, setTemplateFile1,
+    imageFile2, setImageFile2,
+    reconstructedFile2, setReconstructedFile2,
+    templateFile2, setTemplateFile2,
+    setFinalFace // Function to set the final face model
+  } = useFaceModelContext(); // Get context values and functions
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
-    setUseTemplate1(event.target.checked);
+    setIsUseTemplate1(event.target.checked);
   };
 
   const handleSwitchChange2 = (event) => {
-    setUseTemplate2(event.target.checked);
+    setIsUseTemplate2(event.target.checked);
   };
 
   // Fungsi untuk menangani perubahan pada gender untuk Speaker 1
@@ -96,7 +92,7 @@ const ChooseFaceScreen = () => {
     ipcRenderer.once("face-postprocessing-complete", (event, data) => {
       // console.log("Face reconstruction feedback:", data);
       console.log("Face reconstruction and postprocessing successfull");
-      setFile1({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_1.ply" });
+      setReconstructedFile1({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_1.ply" });
     });
   };
 
@@ -139,30 +135,36 @@ const ChooseFaceScreen = () => {
     // Mendengarkan feedback setelah konversi selesai
     ipcRenderer.once("face-postprocessing-complete", (event, data) => {
       console.log("Face reconstruction and postprocessing successfull");
-      setFile2({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_2.ply" });
+      setReconstructedFile2({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_2.ply" });
     });
   };
 
   // Set default 3D model path when the "Use Existing Template?" switch is on for Speaker 1
   useEffect(() => {
-    if (useTemplate1) {
+    if (isUseTemplate1) {
       const modelPath = get3DModelPath(gender1, template1);
       setTemplateFile1({ path: modelPath });
     }
-  }, [useTemplate1, gender1, template1]);
+  }, [isUseTemplate1, gender1, template1]);
 
   // Set default 3D model path when the "Use Existing Template?" switch is on for Speaker 2
   useEffect(() => {
-    if (useTemplate2) {
+    if (isUseTemplate2) {
       const modelPath = get3DModelPath(gender2, template2);
       setTemplateFile2({ path: modelPath });
     }
-  }, [useTemplate2, gender2, template2]);
+  }, [isUseTemplate2, gender2, template2]);
 
   const get3DModelPath = (gender, template) => {
     const basePath = `/home/daffaraihandika/TA/podface-electron/src/assets/meshes/${gender}`;
     return `${basePath}/FLAME_sample_00${template}.ply`; // Construct the path based on the template
   };
+
+  // useEffect to update the final face model whenever the relevant states change
+  useEffect(() => {
+    // Only set final face if necessary (either using template or reconstructed face)
+    setFinalFace();
+  }, [reconstructedFile1, reconstructedFile2, isUseTemplate1, isUseTemplate2, setFinalFace]);
 
   return (
     <Grid
@@ -198,12 +200,12 @@ const ChooseFaceScreen = () => {
           </Grid>
           <Grid item xs={6}>
             <Switch
-              checked={useTemplate1}
+              checked={isUseTemplate1}
               onChange={handleSwitchChange1}
               color="primary"
               sx={{
                 "& .MuiSwitch-track": {
-                  backgroundColor: useTemplate1 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
+                  backgroundColor: isUseTemplate1 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
                 },
                 "& .MuiSwitch-thumb": {
                   backgroundColor: theme.palette.neutral.white, // White color for the thumb
@@ -214,7 +216,7 @@ const ChooseFaceScreen = () => {
         </Grid>
 
         {/* Speaker 1 Choose Template */}
-        {useTemplate1 ? (
+        {isUseTemplate1 ? (
           <>            
             <Grid container alignItems="center" spacing={2}>
               {/* Gender Selection with Toggle Button */}
@@ -289,12 +291,12 @@ const ChooseFaceScreen = () => {
               {/* Right side: Reconstructed 3D Face Model */}
               <Grid item xs={6}>
                 {/* This is shown if the user is not using the template */}
-                {!useTemplate1 && file1 && (
+                {!isUseTemplate1 && reconstructedFile1 && (
                   <CustomField
                     mode="3d"
                     labelText="Reconstructed 3D Face Model"
-                    file={file1}
-                    setFile={setFile1}
+                    file={reconstructedFile1}
+                    setFile={setReconstructedFile1}
                     isPreview={true} // Show preview
                   />
                 )}
@@ -356,12 +358,12 @@ const ChooseFaceScreen = () => {
           </Grid>
           <Grid item xs={6}>
             <Switch
-              checked={useTemplate2}
+              checked={isUseTemplate2}
               onChange={handleSwitchChange2}
               color="primary"
               sx={{
                 "& .MuiSwitch-track": {
-                  backgroundColor: useTemplate2 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
+                  backgroundColor: isUseTemplate2 ? theme.palette.primary.main : theme.palette.neutral.dark, // Dark color when off
                 },
                 "& .MuiSwitch-thumb": {
                   backgroundColor: theme.palette.neutral.white, // White color for the thumb
@@ -372,7 +374,7 @@ const ChooseFaceScreen = () => {
         </Grid>
 
         {/* Speaker 2 Choose Template */}
-        {useTemplate2 ? (
+        {isUseTemplate2 ? (
           <>            
             <Grid container alignItems="center" spacing={2}>
               {/* Gender Selection with Toggle Button */}
@@ -447,12 +449,12 @@ const ChooseFaceScreen = () => {
               {/* Right side: Reconstructed 3D Face Model */}
               <Grid item xs={6}>
                 {/* This is shown if the user is not using the template */}
-                {!useTemplate2 && file2 && (
+                {!isUseTemplate2 && reconstructedFile2 && (
                   <CustomField
                     mode="3d"
                     labelText="Reconstructed 3D Face Model"
-                    file={file2}
-                    setFile={setFile2}
+                    file={reconstructedFile2}
+                    setFile={setReconstructedFile2}
                     isPreview={true} // Show preview
                   />
                 )}
