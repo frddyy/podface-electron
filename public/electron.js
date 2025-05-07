@@ -144,6 +144,89 @@ ipcMain.on("run-mica", (event, args) => {
   });
 });
 
+// Handle the "run-voca" event for speech-driven facial animation
+ipcMain.on("run-voca", (event, args) => {
+  console.log("Starting VOCA script...");
+
+  const graphPath = "/home/daffaraihandika/voca/ds_graph/output_graph.pb";
+  const modelPath = "/home/daffaraihandika/voca/model/gstep_52280.model";
+
+  // Step 1: Run VOCA for facial animation
+  const options = {
+    pythonPath: "/home/daffaraihandika/voca/voca_env/bin/python",  // Path to Python environment
+    scriptPath: "/home/daffaraihandika/voca",  // Path to VOCA folder
+    args: [
+      '--audio_fname', args.audioPath,
+      '--template_fname', args.templatePath,
+      '--out_path', args.outputPath,
+      '--ds_fname', graphPath,
+      '--tf_model_fname', modelPath,
+    ],
+    mode: 'text',
+    pythonOptions: ['-u'],
+  };
+
+  // Run the VOCA script
+  runPythonScript('run_voca.py', options, "VOCA script executed successfully!", "Error executing VOCA script:", event, () => {
+    // After VOCA completes, send a success message to the frontend
+    console.log("VOCA processing completed!");
+    event.reply("voca-processing-complete", { message: "VOCA script executed successfully!" });
+  });
+});
+
+// Step 2: Add eye blink to the animation
+function addEyeBlink(event, args) {
+  console.log("Adding eye blink...");
+
+  const animationOutputPath = args.outputPath;  // Path to VOCA output (animation)
+  const flameEyeBlinkPath = path.join(animationOutputPath, "eye_blink");  // Path to store eye blink
+
+  const options = {
+    pythonPath: "/home/daffaraihandika/voca/voca_env/bin/python",
+    scriptPath: "/home/daffaraihandika/voca",
+    args: [
+      '--source_path', path.join(animationOutputPath, '/meshes'),
+      '--out_path', flameEyeBlinkPath,
+      '--flame_model_path', args.flameModelPath,  // FLAME model path
+      '--mode', 'blink',
+      '--num_blinks', '2',
+      '--blink_duration', '15'
+    ],
+    mode: 'text',
+    pythonOptions: ['-u'],
+  };
+
+  // Run the script to add eye blink to the animation
+  runPythonScript('edit_sequences.py', options, "Eye blink added successfully!", "Error adding eye blink:", event, () => {
+    // After eye blink, visualize the animation sequence
+    visualizeSequence(event, args);
+  });
+}
+
+// Step 3: Visualize the sequence (render the animation)
+function visualizeSequence(event, args) {
+  console.log("Visualizing sequence...");
+
+  const flameEyeBlinkPath = path.join(args.outputPath, 'eye_blink');
+  
+  const options = {
+    pythonPath: "/home/daffaraihandika/voca/voca_env/bin/python",
+    scriptPath: "/home/daffaraihandika/voca", 
+    args: [
+      '--sequence_path', path.join(flameEyeBlinkPath, '/meshes'),
+      '--audio_fname', args.audioPath,
+      '--out_path', flameEyeBlinkPath  // Folder to store the rendered animation
+    ],
+    mode: 'text',
+    pythonOptions: ['-u'],
+  };
+
+  // Run the visualization script to render the final animation
+  runPythonScript('visualize_sequence.py', options, "3D facial animation completed!", "Error visualizing sequence:", event, () => {
+    event.reply("animation-complete", { message: "Facial animation with eye blink and visualization completed!" });
+  });
+}
+
 // Function to run the Python script and send feedback to the frontend
 function runPythonScript(scriptName, options, successMessage, errorMessage, event, nextFunction) {
   const pyshell = new PythonShell(scriptName, options);
