@@ -144,12 +144,36 @@ ipcMain.on("run-mica", (event, args) => {
   });
 });
 
+// Fungsi untuk menjalankan face postprocessing
+function runFacePostprocessing(event, outputFolder, speaker) {
+  console.log("Starting face postprocessing...");
+
+  const micaMeshPath = path.join(outputFolder, `reconstructed_${speaker}.ply`);
+  const alignedMeshPath = path.join(outputFolder, `transformed_${speaker}.ply`);
+
+  const options = {
+    pythonPath: '/home/daffaraihandika/miniconda3/envs/MICA/bin/python',
+    scriptPath: path.join(__dirname, '../scripts'),
+    args: [micaMeshPath, alignedMeshPath],
+    mode: 'text',
+    pythonOptions: ['-u'],
+  };
+
+  runPythonScript('face_postprocessing.py', options, "Face postprocessing completed successfully!", "Error during face postprocessing:", event, () => {
+    console.log("Face postprocessing completed!");
+    event.reply("face-postprocessing-complete", { message: "Face postprocessing completed!" });
+  });
+}
+
 // Handle the "run-voca" event for speech-driven facial animation
 ipcMain.on("run-voca", (event, args) => {
   console.log("Starting VOCA script...");
 
   const graphPath = "/home/daffaraihandika/voca/ds_graph/output_graph.pb";
   const modelPath = "/home/daffaraihandika/voca/model/gstep_52280.model";
+  const outputPath = args.outputPath
+
+  replaceExistingOutputFile(outputPath)
 
   // Step 1: Run VOCA for facial animation
   const options = {
@@ -158,7 +182,7 @@ ipcMain.on("run-voca", (event, args) => {
     args: [
       '--audio_fname', args.audioPath,
       '--template_fname', args.templatePath,
-      '--out_path', args.outputPath,
+      '--out_path', outputPath,
       '--ds_fname', graphPath,
       '--tf_model_fname', modelPath,
     ],
@@ -171,6 +195,7 @@ ipcMain.on("run-voca", (event, args) => {
     // After VOCA completes, send a success message to the frontend
     console.log("VOCA processing completed!");
     event.reply("voca-processing-complete", { message: "VOCA script executed successfully!" });
+    addEyeBlink(event, args)
   });
 });
 
@@ -179,6 +204,7 @@ function addEyeBlink(event, args) {
   console.log("Adding eye blink...");
 
   const animationOutputPath = args.outputPath;  // Path to VOCA output (animation)
+  const flameModelPath = "/home/daffaraihandika/voca/flame/generic_model.pkl";
   const flameEyeBlinkPath = path.join(animationOutputPath, "eye_blink");  // Path to store eye blink
 
   const options = {
@@ -187,7 +213,7 @@ function addEyeBlink(event, args) {
     args: [
       '--source_path', path.join(animationOutputPath, '/meshes'),
       '--out_path', flameEyeBlinkPath,
-      '--flame_model_path', args.flameModelPath,  // FLAME model path
+      '--flame_model_path', flameModelPath,
       '--mode', 'blink',
       '--num_blinks', '2',
       '--blink_duration', '15'
@@ -199,6 +225,8 @@ function addEyeBlink(event, args) {
   // Run the script to add eye blink to the animation
   runPythonScript('edit_sequences.py', options, "Eye blink added successfully!", "Error adding eye blink:", event, () => {
     // After eye blink, visualize the animation sequence
+    console.log("Add eye blink processing completed!");
+    event.reply("add-eyeblink-processing-complete", { message: "Add eye blink script executed successfully!" });
     visualizeSequence(event, args);
   });
 }
@@ -254,23 +282,17 @@ function runPythonScript(scriptName, options, successMessage, errorMessage, even
   });
 }
 
-// Fungsi untuk menjalankan face postprocessing
-function runFacePostprocessing(event, outputFolder, speaker) {
-  console.log("Starting face postprocessing...");
-
-  const micaMeshPath = path.join(outputFolder, `reconstructed_${speaker}.ply`);
-  const alignedMeshPath = path.join(outputFolder, `transformed_${speaker}.ply`);
-
-  const options = {
-    pythonPath: '/home/daffaraihandika/miniconda3/envs/MICA/bin/python',
-    scriptPath: path.join(__dirname, '../scripts'),
-    args: [micaMeshPath, alignedMeshPath],
-    mode: 'text',
-    pythonOptions: ['-u'],
-  };
-
-  runPythonScript('face_postprocessing.py', options, "Face postprocessing completed successfully!", "Error during face postprocessing:", event, () => {
-    console.log("Face postprocessing completed!");
-    event.reply("face-postprocessing-complete", { message: "Face postprocessing completed!" });
-  });
+// Fungsi untuk memeriksa dan menghapus file dalam direktori
+function replaceExistingOutputFile(animationOutputPath) {
+  if (fs.existsSync(animationOutputPath)) {
+    try {
+      // Menghapus seluruh direktori beserta isinya
+      fs.rmSync(animationOutputPath, { recursive: true, force: true });
+      console.log(`Direktori ${animationOutputPath} beserta isinya telah dihapus.`);
+    } catch (err) {
+      console.error("Gagal menghapus direktori:", err);
+    }
+  } else {
+    console.log(`Direktori ${animationOutputPath} tidak ditemukan.`);
+  }
 }
