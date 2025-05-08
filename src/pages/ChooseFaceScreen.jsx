@@ -56,10 +56,10 @@ const ChooseFaceScreen = () => {
   const handleOpenImageDialog1 = () => {
     const { ipcRenderer } = window.require("electron");
 
-    ipcRenderer.send("open-file-dialog");
+    ipcRenderer.send("open-image-file-dialog");
 
-    ipcRenderer.once("file-selected", (event, data) => {
-      const imageURL = data.filePath;
+    ipcRenderer.once("image-file-selected", (event, data) => {
+      const imageURL = data.imageFilePath;
       console.log("Received image URL: ", imageURL);
       setImageFile1({ path: imageURL });
     });
@@ -100,10 +100,10 @@ const ChooseFaceScreen = () => {
   const handleOpenImageDialog2 = () => {
     const { ipcRenderer } = window.require("electron");
 
-    ipcRenderer.send("open-file-dialog");
+    ipcRenderer.send("open-image-file-dialog");
 
-    ipcRenderer.once("file-selected", (event, data) => {
-      const imageURL = data.filePath;
+    ipcRenderer.once("image-file-selected", (event, data) => {
+      const imageURL = data.imageFilePath;
       console.log("Received image URL: ", imageURL);
       setImageFile2({ path: imageURL });
     });

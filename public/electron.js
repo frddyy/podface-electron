@@ -44,16 +44,37 @@ app.on("window-all-closed", () => {
   }
 });
 
-// Handle file open dialog
-ipcMain.on("open-file-dialog", async (event) => {
+// Handle open file dialog for audio files (only .wav)
+ipcMain.on("open-audio-file-dialog", async (event) => {
   const result = await dialog.showOpenDialog({
     properties: ['openFile'],
+    filters: [
+      { name: 'Audio Files', extensions: ['wav'] } // Filter untuk file .wav
+    ]
   });
 
   if (!result.canceled) {
-    const filePath = result.filePaths[0]; // Get the absolute file path
-    console.log("Selected file path: ", filePath);
-    event.reply("file-selected", { filePath }); // Send the absolute path to renderer
+    const audioFilePath = result.filePaths[0]; // Get the absolute file path
+    console.log("Selected audio file path: ", audioFilePath);
+    event.reply("audio-file-selected", { audioFilePath }); // Send the absolute path to renderer
+  } else {
+    console.log("No file selected.");
+  }
+});
+
+// Handle open file dialog for image files (only .jpg and .png)
+ipcMain.on("open-image-file-dialog", async (event) => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [
+      { name: 'Image Files', extensions: ['jpg', 'jpeg', 'png'] }  // Filter untuk file .jpg, .jpeg, .png
+    ]
+  });
+
+  if (!result.canceled) {
+    const imageFilePath = result.filePaths[0]; // Get the absolute file path
+    console.log("Selected image file path: ", imageFilePath);
+    event.reply("image-file-selected", { imageFilePath }); // Send the absolute path to renderer
   } else {
     console.log("No file selected.");
   }

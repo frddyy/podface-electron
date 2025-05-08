@@ -17,10 +17,10 @@ const ProcessAudioScreen = () => {
   const handleOpenFileDialog = () => {
     const { ipcRenderer } = window.require("electron");
 
-    ipcRenderer.send("open-file-dialog");
+    ipcRenderer.send("open-audio-file-dialog");
 
-    ipcRenderer.once("file-selected", (event, data) => {
-      const audioURL = data.filePath; // Object URL received from main process
+    ipcRenderer.once("audio-file-selected", (event, data) => {
+      const audioURL = data.audioFilePath; // Object URL received from main process
       console.log("Received audio URL: ", audioURL);
       setFileAudioPodcast({ path: audioURL });
     });
