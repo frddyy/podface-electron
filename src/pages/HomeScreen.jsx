@@ -21,7 +21,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <Grid container justifyContent="center" alignItems="center">
+    <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: "100px" }}>
       {/* Logo Section */}
       <Grid item xs={12} sm={4} md={3} align="left">
         <Box sx={{ marginBottom: "30px" }}>

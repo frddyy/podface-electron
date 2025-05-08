@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const { PythonShell } = require("python-shell");
+const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const fs = require("fs");
 
@@ -254,6 +255,76 @@ function visualizeSequence(event, args) {
     event.reply("animation-complete", { message: "Facial animation with eye blink and visualization completed!" });
   });
 }
+
+// Menangani permintaan untuk menggabungkan dua file audio
+ipcMain.on("combine-audio", (event, args) => {
+  const audioPath1 = args.audioPath1;  // Path audio 1 dari args
+  const audioPath2 = args.audioPath2;  // Path audio 2 dari args
+  const outputPath = args.outputPath;  // Path untuk hasil output
+
+  const options = {
+    pythonPath: '/home/daffaraihandika/TA/speechbrain/speechbrain_env/bin/python',  // Path ke Python environment
+    scriptPath: path.join(__dirname, '../scripts'),  // Path to your Python scripts folder
+    args: [audioPath1, audioPath2, outputPath],  // Pass file paths sebagai argumen
+  };
+
+  runPythonScript("combine_audio.py", options, "Audio successfully combined", "Error combining audio:", event, (event) => {
+    event.reply("audio-combined", { message: "Audio combined script executed successfully!" });  // Kirimkan path file hasil gabungan
+  });
+});
+
+// Fungsi untuk menggabungkan video dan audio menjadi podcast
+ipcMain.on("merge-podcasts", (event, args) => {
+  console.log("Merging podcasts...");
+
+  const { video1Path, video2Path, audioPath, outputPath } = args;
+
+  // Membuat instance ffmpeg untuk penggabungan video
+  let mergedVideo = ffmpeg();
+
+  // Menambahkan kedua video sebagai input
+  mergedVideo.addInput(video1Path);
+  mergedVideo.addInput(video2Path);
+
+  // Menyimpan file sementara untuk hasil penggabungan video
+  const tempMergedVideoPath = path.join(path.dirname(outputPath), 'temp_merged_video.mp4');
+
+  // Menggunakan filter complex untuk menggabungkan video secara horizontal (hstack)
+  mergedVideo
+    .complexFilter([
+      '[0:v]scale=800:800[v0]',  // Mengubah ukuran video pertama menjadi 800x800
+      '[1:v]scale=800:800[v1]',  // Mengubah ukuran video kedua menjadi 800x800
+      '[v0][v1]hstack=inputs=2[v]' // Menggabungkan kedua video secara horizontal
+    ])
+    .outputOptions('-map', '[v]')  // Menyimpan video hasil gabungan
+    .output(tempMergedVideoPath)  // Menyimpan output sementara
+    .on('error', (err) => {
+      console.log('Error merging videos: ' + err.message);
+      event.reply("podcast-merged", { error: err.message });
+    })
+    .on('end', () => {
+      console.log('Videos merged successfully!');
+
+      // Sekarang tambahkan audio ke video yang sudah digabungkan
+      ffmpeg(tempMergedVideoPath)
+        .input(audioPath)
+        .outputOptions('-map', '0:v')  // Menggunakan video yang digabungkan
+        .outputOptions('-map', '1:a')  // Menggunakan audio
+        .outputOptions('-c:v', 'copy')  // Menyalin video stream tanpa perubahan
+        .outputOptions('-shortest')  // Memastikan durasi audio dan video sama
+        .on('error', (err) => {
+          console.error('Error adding audio to video:', err);
+          event.reply("podcast-merged", { error: err.message });
+        })
+        .on('end', () => {
+          console.log('Final podcast video created successfully.');
+          // Setelah audio ditambahkan, simpan ke output final
+          event.reply("podcast-merged", { output: outputPath });
+        })
+        .save(outputPath);  // Menyimpan file final dengan audio
+    })
+    .run();  // Mulai proses penggabungan video
+});
 
 // Function to run the Python script and send feedback to the frontend
 function runPythonScript(scriptName, options, successMessage, errorMessage, event, nextFunction) {

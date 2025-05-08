@@ -3,15 +3,13 @@ import { Box, Grid, Typography, Divider, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAudioContext } from "../context/AudioContext";
 import { useFaceModelContext } from "../context/FaceModelContext";
+import { useRenderContext } from "../context/RenderContext";
 import CustomField from "../components/CustomField";
 
 const AnimateRenderScreen = () => {
   const theme = useTheme();
-  const [isSpeaker1Rendered, setIsSpeaker1Rendered] = useState(false); // State untuk mengecek apakah animasi speaker 1 sudah dirender
-  const [isSpeaker2Rendered, setIsSpeaker2Rendered] = useState(false); // State untuk mengecek apakah animasi speaker 2 sudah dirender
 
-  const [videoFile1, setVideoFile1] = useState(null);
-  const [videoFile2, setVideoFile2] = useState(null);
+  const { isSpeaker1Rendered, setIsSpeaker1Rendered, isSpeaker2Rendered, setIsSpeaker2Rendered, videoFile1, setVideoFile1, videoFile2, setVideoFile2 } = useRenderContext();
 
   const { finalAudio1, finalAudio2, setFinalAudio1, setFinalAudio2 } = useAudioContext(); // Ambil final audio dari context
   const { finalFace1, finalFace2, setFinalFace1, setFinalFace2 } = useFaceModelContext(); // Ambil final face dari context

@@ -5,13 +5,19 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AudioProvider } from './context/AudioContext';
 import { FaceModelProvider } from './context/FaceModelContext';
+import { RenderProvider } from './context/RenderContext';
+import { PodcastProvider } from './context/PodcastContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AudioProvider>
       <FaceModelProvider>
-        <App />
+        <RenderProvider>
+          <PodcastProvider>
+            <App />
+          </PodcastProvider>
+        </RenderProvider>
       </FaceModelProvider>
     </AudioProvider>
   </React.StrictMode>
