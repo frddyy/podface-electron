@@ -1,37 +1,43 @@
 import trimesh
 import sys
 
-# Ambil argumen input dan output dari command line
-mica_mesh_path = sys.argv[1]  # File mesh input dari MICA
-aligned_mesh_path = sys.argv[2]  # File output yang akan disimpan
+def face_postprocessing(mica_mesh_path, aligned_mesh_path):
+    
+    # Tentukan nilai scaling dan translasi secara default di dalam fungsi
+    scaling_factor = 0.4  # Faktor skala untuk mengurangi ukuran mesh (misalnya 0.4 berarti 40% dari ukuran asli)
+    translation_y = 0.05  # Translasi pada sumbu Y (misalnya, geser 0.05 unit ke atas)
 
-# Scaling factor (misalnya, 0.4 berarti 40% dari ukuran asli)
-scaling_factor = 0.4
+    try:
+        # Muat mesh dari MICA
+        mica_mesh = trimesh.load(mica_mesh_path)
+        print("Mesh loaded successfully from MICA!")
 
-# Translasi pada sumbu Y (misalnya, geser 0.05 unit ke atas)
-translation_y = 0.05
+        # Hanya gunakan vertices dan faces (hapus atribut tambahan)
+        simple_mesh = trimesh.Trimesh(vertices=mica_mesh.vertices, faces=mica_mesh.faces)
 
-try:
-    # Muat mesh dari MICA
-    mica_mesh = trimesh.load(mica_mesh_path)
-    print("Mesh loaded successfully from MICA!")
+        # Normalize mesh (pusatkan ke (0, 0, 0) dan atur skala ke 1)
+        simple_mesh.vertices -= simple_mesh.center_mass  # Pusatkan ke (0, 0, 0)
+        simple_mesh.vertices /= simple_mesh.scale       # Atur skala ke 1
 
-    # Hanya gunakan vertices dan faces (hapus atribut tambahan)
-    simple_mesh = trimesh.Trimesh(vertices=mica_mesh.vertices, faces=mica_mesh.faces)
+        # Apply scaling untuk mengurangi ukuran (kalikan vertices dengan scaling_factor)
+        simple_mesh.vertices *= scaling_factor  # Scale down the model
 
-    # Normalize mesh (pusatkan ke (0, 0, 0) dan atur skala ke 1)
-    simple_mesh.vertices -= simple_mesh.center_mass  # Pusatkan ke (0, 0, 0)
-    simple_mesh.vertices /= simple_mesh.scale       # Atur skala ke 1
+        # Geser mesh ke atas pada sumbu Y
+        simple_mesh.vertices[:, 1] += translation_y  # Translasi pada sumbu Y (kolom ke-2 dari vertices)
 
-    # Apply scaling untuk mengurangi ukuran (kalikan vertices dengan scaling_factor)
-    simple_mesh.vertices *= scaling_factor  # Scale down the model
+        # Simpan file mesh baru
+        simple_mesh.export(aligned_mesh_path, file_type='ply')
+        print(f"Scaled and translated mesh saved to: {aligned_mesh_path}")
 
-    # Geser mesh ke atas pada sumbu Y
-    simple_mesh.vertices[:, 1] += translation_y  # Translasi pada sumbu Y (kolom ke-2 dari vertices)
+    except Exception as e:
+        print(f"Error processing MICA mesh: {e}")
 
-    # Simpan file mesh baru
-    simple_mesh.export(aligned_mesh_path, file_type='ply')
-    print(f"Scaled and translated mesh saved to: {aligned_mesh_path}")
 
-except Exception as e:
-    print(f"Error processing MICA mesh: {e}")
+# Cek apakah script dipanggil langsung, jika ya, jalankan fungsi dengan argumen yang diterima dari command line
+if __name__ == "__main__":
+    # Ambil argumen input dan output dari command line
+    mica_mesh_path = sys.argv[1]  # File mesh input dari MICA
+    aligned_mesh_path = sys.argv[2]  # File output yang akan disimpan
+
+    # Menjalankan fungsi dengan nilai default untuk scaling dan translasi
+    face_postprocessing(mica_mesh_path, aligned_mesh_path)
