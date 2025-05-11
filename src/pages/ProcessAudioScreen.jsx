@@ -40,11 +40,11 @@ const ProcessAudioScreen = () => {
         console.log("Feedback from Python:", data.message);
       });
 
-      ipcRenderer.once("audio-separation-complete", (event, data) => {
+      ipcRenderer.once("audio-enhancement-complete", (event, data) => {
         // Set the paths of the separated audio files
         setSeparatedAudioFiles({
-          speaker1: data.speaker1,
-          speaker2: data.speaker2,
+          speaker1: data.enhancedSpeaker1,
+          speaker2: data.enhancedSpeaker2,
         });
       });
     }

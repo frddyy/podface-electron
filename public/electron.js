@@ -92,15 +92,39 @@ ipcMain.on("separate-audio", (event, args) => {
     args: [audioPath],  // Pass the audio file path to the Python script
   };
 
+  // Run the separate_audio.py script
   runPythonScript('separate_audio.py', options, "Audio separation completed", "Error executing audio separation:", event, (event) => {
-    // Kirimkan path hasil pemisahan audio ke renderer setelah proses selesai
     const separatedAudioPaths = {
-      speaker1: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_1.wav',
-      speaker2: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_2.wav'
+      speaker1: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/speaker_1.wav',
+      speaker2: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/speaker_2.wav',
     };
-    event.reply('audio-separation-complete', separatedAudioPaths); // Kirimkan path file ke renderer
+    console.log("Separation complete, starting enhancement...");
+    
+    // Now call the enhanceAudio function after separation
+    enhanceAudio(separatedAudioPaths.speaker1, separatedAudioPaths.speaker2, event);
   });
 });
+
+// Function to enhance audio
+function enhanceAudio(speaker1Path, speaker2Path, event) {
+  console.log("Starting audio enhancement...");
+
+  const options = {
+    pythonPath: '/home/daffaraihandika/TA/speechbrain/speechbrain_env/bin/python',  // Path to Python executable
+    scriptPath: path.join(__dirname, '../scripts'),  // Path to the Python scripts folder
+    args: [speaker1Path, speaker2Path, './speechbrain/output'],  // Send the separated audio paths and output folder
+  };
+
+  // Run the enhance_audio.py script
+  runPythonScript('enhance_audio.py', options, "Audio enhancement completed", "Error executing audio enhancement:", event, (event) => {
+    const enhancedAudioPaths = {
+      enhancedSpeaker1: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_1.wav',
+      enhancedSpeaker2: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_2.wav',
+    };
+    // Send the paths of the enhanced audio to the renderer
+    event.reply('audio-enhancement-complete', enhancedAudioPaths);
+  });
+}
 
 // Fungsi untuk menjalankan voice conversion menggunakan Seed-VC
 ipcMain.on("voice-conversion", (event, args) => {
