@@ -18,7 +18,7 @@ const ImagePreviewField = ({ file }) => {
           loader={<div>Loading...</div>} // Fallback loader
           unloader={<div>Failed to load image</div>} // Fallback for failed load
           style={{
-            maxWidth: "100%", // Prevent the image from exceeding container width
+            maxWidth: "400px", // Prevent the image from exceeding container width
             maxHeight: "100%", // Maintain aspect ratio
             objectFit: "contain", // Make sure the image scales without distortion
           }}

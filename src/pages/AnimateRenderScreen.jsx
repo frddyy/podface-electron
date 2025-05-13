@@ -37,7 +37,6 @@ const AnimateRenderScreen = () => {
       setVideoFile1({
         path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
-      setIsSpeaker1Rendered(true); // Optionally, set the message to display in the UI
     });
   };
 
@@ -64,7 +63,6 @@ const AnimateRenderScreen = () => {
       setVideoFile2({
         path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
-      setIsSpeaker2Rendered(true); // Optionally, set the message to display in the UI
     });
   };
 
@@ -115,6 +113,7 @@ const AnimateRenderScreen = () => {
                 file={finalFace1}
                 setFile={setFinalFace1}
                 isPreview={true} // Show preview
+                hideRemoveButton={true}
               />
             </Box>
 
@@ -125,11 +124,12 @@ const AnimateRenderScreen = () => {
                 file={finalAudio1}
                 setFile={setFinalAudio1}
                 isPreview={true} // Show Preview
+                hideRemoveButton={true}
               />
             </Box>
 
             <Box sx={{ marginTop: 2, display: "flex", justifyContent: "flex-end" }}>
-              {(finalAudio1 && finalFace1) && (
+              {(finalAudio1?.path && finalFace1) && (
                 <Button
                   variant="contained"
                   color="primary"
@@ -200,6 +200,7 @@ const AnimateRenderScreen = () => {
                 file={finalFace2}
                 setFile={setFinalFace2}
                 isPreview={true} // Show preview
+                hideRemoveButton={true}
               />
             </Box>
 
@@ -210,11 +211,12 @@ const AnimateRenderScreen = () => {
                 file={finalAudio2}
                 setFile={setFinalAudio2}
                 isPreview={true} // Show Preview
+                hideRemoveButton={true}
               />
             </Box>
 
             <Box sx={{ marginTop: 2, display: "flex", justifyContent: "flex-end" }}>
-              {(finalAudio2 && finalFace2) && (
+              {(finalAudio2?.path && finalFace2) && (
                 <Button
                   variant="contained"
                   color="primary"

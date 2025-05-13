@@ -3,6 +3,8 @@ const { PythonShell } = require("python-shell");
 const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const fs = require("fs");
+const WavDecoder = require('wav-decoder');
+const sharp = require('sharp');
 
 let mainWindow;
 
@@ -56,11 +58,28 @@ ipcMain.on("open-audio-file-dialog", async (event) => {
   if (!result.canceled) {
     const audioFilePath = result.filePaths[0]; // Get the absolute file path
     console.log("Selected audio file path: ", audioFilePath);
-    event.reply("audio-file-selected", { audioFilePath }); // Send the absolute path to renderer
+    // Validate the .wav file
+    isValidWavFile(audioFilePath, event);
   } else {
     console.log("No file selected.");
   }
 });
+
+// Function to validate if the selected file is a valid .wav file
+function isValidWavFile(filePath, event) {
+  const buffer = fs.readFileSync(filePath);
+
+  // Try to decode the file using wav-decoder
+  WavDecoder.decode(buffer)
+    .then(() => {
+      console.log('Valid WAV file');
+      event.reply("audio-file-selected", { audioFilePath: filePath }); // Send the valid path to renderer
+    })
+    .catch((error) => {
+      console.error('Invalid WAV file:', error);
+      event.reply("invalid-audio-file", { message: 'The file is not a valid .wav file.' });  // Send error message to renderer
+    });
+}
 
 // Handle open file dialog for image files (only .jpg and .png)
 ipcMain.on("open-image-file-dialog", async (event) => {
@@ -74,11 +93,28 @@ ipcMain.on("open-image-file-dialog", async (event) => {
   if (!result.canceled) {
     const imageFilePath = result.filePaths[0]; // Get the absolute file path
     console.log("Selected image file path: ", imageFilePath);
-    event.reply("image-file-selected", { imageFilePath }); // Send the absolute path to renderer
+    // Validate the image file
+    validateImageFile(imageFilePath, event);
   } else {
     console.log("No file selected.");
   }
 });
+
+function validateImageFile(filePath, event) {
+  sharp(filePath)
+    .metadata()  // Mendapatkan metadata gambar
+    .then((metadata) => {
+      // Memeriksa apakah format gambar valid (JPEG atau PNG)
+      if (metadata.format === 'jpeg' || metadata.format === 'png') {
+        console.log('Valid image file:', metadata.format);
+        event.reply("image-file-selected", { imageFilePath: filePath });  // Kirim path file gambar yang valid ke renderer
+      }
+    })
+    .catch((err) => {
+      console.error('Error reading image:', err);
+      event.reply("invalid-image-file", { message: 'The file is not a valid .jpg or .png image.' });  // Menangani error jika file tidak bisa diproses
+    });
+}
 
 // Handle "separate-audio" event for processing audio
 ipcMain.on("separate-audio", (event, args) => {

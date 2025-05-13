@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Grid, Typography, Divider, Switch, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Grid, Typography, Divider, Switch, Button, Snackbar, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField";
 import { useAudioContext } from "../context/AudioContext";
@@ -17,6 +17,13 @@ const ModifyVoiceScreen = () => {
     separatedAudioFiles,
     setFinalAudio
   } = useAudioContext(); // Ambil context dari AudioContext
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);  
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  useEffect(() => {
+    console.log("Converted file 1:", convertedFile1);
+  }, [convertedFile1]); 
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
@@ -38,6 +45,12 @@ const ModifyVoiceScreen = () => {
       console.log("Received audio URL: ", audioURL);
       setFileAudioReference1({ path: audioURL });
     });
+
+    ipcRenderer.once("invalid-audio-file", (event, data) => {
+      // If the file is invalid, show an error message in Snackbar
+      setSnackbarMessage(data.message);
+      setSnackbarOpen(true);
+    });
   };
 
   const handleOpenFileDialog2 = () => {
@@ -49,6 +62,12 @@ const ModifyVoiceScreen = () => {
       const audioURL = data.audioFilePath; // Object URL received from main process
       console.log("Received audio URL: ", audioURL);
       setFileAudioReference2({ path: audioURL });
+    });
+
+    ipcRenderer.once("invalid-audio-file", (event, data) => {
+      // If the file is invalid, show an error message in Snackbar
+      setSnackbarMessage(data.message);
+      setSnackbarOpen(true);
     });
   };
 
@@ -106,6 +125,10 @@ const ModifyVoiceScreen = () => {
         setConvertedFile2({ path: data.convertedAudioPaths.speaker2 }); // Menyimpan path hasil konversi
       });
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   // Menggunakan useEffect untuk memperbarui final audio setelah konversi selesai
@@ -337,6 +360,16 @@ const ModifyVoiceScreen = () => {
           )}
         </Grid>
       </Grid>
+      {/* Snackbar for invalid file format */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="error" variant="filled" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 };

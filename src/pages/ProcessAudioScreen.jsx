@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import { Box, Grid, Button, Typography, Divider } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Grid, Button, Divider, Snackbar, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField";
 import { useAudioContext } from "../context/AudioContext";
 
 const ProcessAudioScreen = () => {
   const { fileAudioPodcast, setFileAudioPodcast, separatedAudioFiles, setSeparatedAudioFiles } = useAudioContext(); // Ambil context dari AudioContext
+  const [snackbarOpen, setSnackbarOpen] = useState(false);  
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const theme = useTheme();
 
-  // Handle file remove
-  const handleFileRemove = () => {
-    setFileAudioPodcast(null);
-  };
+  useEffect(() => {
+      console.log("Separated Audio Files:", separatedAudioFiles);
+    }, [separatedAudioFiles]); 
 
   // Open file dialog using ipcRenderer
   const handleOpenFileDialog = () => {
@@ -22,7 +23,14 @@ const ProcessAudioScreen = () => {
     ipcRenderer.once("audio-file-selected", (event, data) => {
       const audioURL = data.audioFilePath; // Object URL received from main process
       console.log("Received audio URL: ", audioURL);
+
       setFileAudioPodcast({ path: audioURL });
+    });
+
+    ipcRenderer.once("invalid-audio-file", (event, data) => {
+      // If the file is invalid, show an error message in Snackbar
+      setSnackbarMessage(data.message);
+      setSnackbarOpen(true);
     });
   };
 
@@ -48,6 +56,10 @@ const ProcessAudioScreen = () => {
         });
       });
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -80,7 +92,6 @@ const ProcessAudioScreen = () => {
           labelText="Input Podcast Audio"
           file={fileAudioPodcast}
           setFile={setFileAudioPodcast}
-          onFileRemove={handleFileRemove}  // Optional: Pass the remove handler to CustomField
           isPreview={false} // Hide preview before file upload
           onOpenFileDialog={handleOpenFileDialog} // Pass the handler for opening file dialog
         />
@@ -153,6 +164,16 @@ const ProcessAudioScreen = () => {
             />
         </Box>
       </Grid>
+      {/* Snackbar for invalid file format */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="error" variant="filled" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 };

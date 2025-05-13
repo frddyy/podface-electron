@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Typography, Divider, Switch, ToggleButton, ToggleButtonGroup, Radio, RadioGroup, FormControlLabel, Button } from "@mui/material";
+import { Grid, Typography, Divider, Switch, ToggleButton, ToggleButtonGroup, Radio, RadioGroup, FormControlLabel, Button, Snackbar, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField";
 import { useFaceModelContext } from "../context/FaceModelContext"; 
@@ -22,6 +22,9 @@ const ChooseFaceScreen = () => {
     templateFile2, setTemplateFile2,
     setFinalFace // Function to set the final face model
   } = useFaceModelContext(); // Get context values and functions
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);  
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
@@ -62,6 +65,12 @@ const ChooseFaceScreen = () => {
       const imageURL = data.imageFilePath;
       console.log("Received image URL: ", imageURL);
       setImageFile1({ path: imageURL });
+    });
+
+    ipcRenderer.once("invalid-image-file", (event, data) => {
+      // If the file is invalid, show an error message in Snackbar
+      setSnackbarMessage(data.message);
+      setSnackbarOpen(true);
     });
   };
 
@@ -106,6 +115,12 @@ const ChooseFaceScreen = () => {
       const imageURL = data.imageFilePath;
       console.log("Received image URL: ", imageURL);
       setImageFile2({ path: imageURL });
+    });
+
+    ipcRenderer.once("invalid-image-file", (event, data) => {
+      // If the file is invalid, show an error message in Snackbar
+      setSnackbarMessage(data.message);
+      setSnackbarOpen(true);
     });
   };
 
@@ -158,6 +173,10 @@ const ChooseFaceScreen = () => {
   const get3DModelPath = (gender, template) => {
     const basePath = `/home/daffaraihandika/TA/podface-electron/src/assets/meshes/${gender}`;
     return `${basePath}/FLAME_sample_00${template}.ply`; // Construct the path based on the template
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   // useEffect to update the final face model whenever the relevant states change
@@ -271,6 +290,7 @@ const ChooseFaceScreen = () => {
               file={templateFile1}
               setFile={setTemplateFile1}
               isPreview={true} // Show preview
+              hideRemoveButton={true}
             />
           </>
         ) : (
@@ -480,6 +500,16 @@ const ChooseFaceScreen = () => {
           </>
         )}
       </Grid>
+      {/* Snackbar for invalid file format */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="error" variant="filled" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 }

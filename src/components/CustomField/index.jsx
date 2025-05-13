@@ -8,6 +8,7 @@ import ImagePreviewField from "./ImagePreviewField"; // Import the preview compo
 import VideoPreviewField from "./VideoPreviewField"; // Import the preview component for video
 import MeshPreviewField from "./MeshPreviewField"; // Import the MeshPreviewField for 3D meshes
 import { MusicNote, Image, VideoLibrary, MoodOutlined } from "@mui/icons-material"; // Corrected import
+import { useAudioContext } from "../../context/AudioContext";
 
 const CustomField = ({
   mode = "audio",
@@ -16,13 +17,26 @@ const CustomField = ({
   isPreview = false,
   file,
   setFile,
-  onOpenFileDialog, // Added prop to handle opening the file dialog
+  onOpenFileDialog,
+  hideRemoveButton = false,
 }) => {
   const theme = useTheme();
+  const { setSeparatedAudioFiles, separatedAudioFiles } = useAudioContext(); // Ambil context dari AudioContext
 
   // Handle file removal
   const handleRemoveFile = () => {
     setFile(null);
+    if (mode === "audio" && labelText === "Speaker 1") {
+      setSeparatedAudioFiles((prevState) => ({
+        ...prevState,
+        speaker1: null, // Hapus entri untuk Speaker 1
+      }));
+    } else if (mode === "audio" && labelText === "Speaker 2") {
+      setSeparatedAudioFiles((prevState) => ({
+        ...prevState,
+        speaker2: null, // Hapus entri untuk Speaker 2
+      }));
+    }
     if (onFileRemove) onFileRemove();
   };
 
@@ -69,13 +83,15 @@ const CustomField = ({
         </Grid>
 
         {/* Remove button (only visible if a file is uploaded) */}
-        {file && (
+        {!hideRemoveButton && (
+          (file && file.path) ||
+          (mode === "audio" && labelText === "Speaker 1" && separatedAudioFiles.speaker1) ||
+          (mode === "audio" && labelText === "Speaker 2" && separatedAudioFiles.speaker2)
+        ) ? (
           <IconButton onClick={handleRemoveFile}>
-            <DisabledByDefaultOutlinedIcon
-              sx={{ color: theme.palette.neutral.dark }}
-            />
+            <DisabledByDefaultOutlinedIcon sx={{ color: theme.palette.neutral.dark }} />
           </IconButton>
-        )}
+        ) : null}
       </Grid>
 
       {/* Upload or Preview Section */}
