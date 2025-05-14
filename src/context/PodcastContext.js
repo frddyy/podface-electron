@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Buat context untuk menyimpan status merge podcast
 const PodcastContext = createContext();
@@ -7,6 +7,14 @@ const PodcastContext = createContext();
 export const PodcastProvider = ({ children }) => {
   const [videoPodcastFile, setVideoPodcastFile] = useState(null);  // Menyimpan file hasil merge video dan audio
   const [isPodcastMerged, setIsPodcastMerged] = useState(false);   // Status apakah video podcast sudah berhasil digabung
+
+  useEffect(() => {
+    if (videoPodcastFile === null) {
+      setIsPodcastMerged(false); // Set to false if videoFile1 is null
+    } else {
+      setIsPodcastMerged(true); // Set to true if videoFile1 is not null
+    }
+  }, [videoPodcastFile]); // Triggered when videoFile1 changes
 
   return (
     <PodcastContext.Provider

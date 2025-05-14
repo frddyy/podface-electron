@@ -1,10 +1,51 @@
 import React, { useEffect } from 'react';
 import { Grid, Typography, Box, Button } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField"; // Pastikan CustomField disesuaikan untuk video
 import { usePodcastContext } from '../context/PodcastContext';
-
+import { useAudioContext } from '../context/AudioContext';
+import { useRenderContext } from '../context/RenderContext';
 const ResultScreen = () => {
-  const { videoPodcastFile, setVideoPodcastFile } = usePodcastContext();
+  const { videoPodcastFile, setVideoPodcastFile, isPodcastMerged } = usePodcastContext();
+  const { finalAudio1, finalAudio2 } = useAudioContext();
+  const { videoFile1, videoFile2 } = useRenderContext();
+  const theme = useTheme();
+
+  const handleGenerate = () => {
+    console.log("Starting to generate podcast...");
+
+    const { ipcRenderer } = window.require("electron");
+
+    // Path for the combined audio file
+    const combinedAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/combined_audio.wav";
+    const outputPath = "/home/daffaraihandika/TA/podface-electron/src/assets/video/final_podcast.mp4";
+
+    // Menggabungkan audio
+    ipcRenderer.send("combine-audio", {
+      audioPath1: finalAudio1.path,
+      audioPath2: finalAudio2.path,
+      outputPath: combinedAudioPath,
+    });
+
+    ipcRenderer.once("audio-combined", (event, data) => {
+      console.log("Audio combined:", data);
+
+      // Setelah penggabungan audio selesai, lanjutkan dengan menggabungkan video
+      ipcRenderer.send("merge-podcasts", {
+        video1Path: videoFile1.path,
+        video2Path: videoFile2.path,
+        audioPath: combinedAudioPath, // Path audio gabungan
+        outputPath: outputPath,
+      });
+
+      ipcRenderer.once("podcast-merged", (event, data) => {
+        console.log("Podcast merged successfully!", data);
+
+        // Set video file for podcast and trigger necessary updates
+        setVideoPodcastFile({ path: data.output });
+      });
+    });
+  };
 
   useEffect(() => {
     console.log("Current videoPodcastFile: ", videoPodcastFile);
@@ -25,7 +66,7 @@ const ResultScreen = () => {
       </Typography>
 
       {/* Display the video inside CustomField */}
-      <Box sx={{ maxWidth: "800px", width: "100%", mb: 2 }}>
+      <Box sx={{ maxWidth: "800px", width: "100%", mb: 10 }}>
         <CustomField
           mode="video"
           labelText="Podcast Video"
@@ -36,6 +77,30 @@ const ResultScreen = () => {
       </Box>
 
       {/* Additional styling or content can be added here */}
+      {!isPodcastMerged && (
+        <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 7 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{
+              fontWeight: 600,
+              textTransform: "none",
+              maxWidth: 100,
+              alignSelf: "flex-end",
+              "&.Mui-disabled": {
+                backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                opacity: 0.5
+              },
+            }}
+            disabled={!(videoFile1 && videoFile2)}
+            onClick={handleGenerate}
+          >
+            Generate
+          </Button>
+        </Box>
+      )}
     </Grid>
   );
 };
