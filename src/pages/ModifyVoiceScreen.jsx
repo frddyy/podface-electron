@@ -14,8 +14,9 @@ const ModifyVoiceScreen = () => {
     fileAudioReference2, setFileAudioReference2,
     convertedFile1, setConvertedFile1,
     convertedFile2, setConvertedFile2,
-    separatedAudioFiles,
-    setFinalAudio
+    separatedAudioFiles,setFinalAudio,
+    isConvertion1Loading, setIsConvertion1Loading,
+    isConvertion2Loading, setIsConvertion2Loading
   } = useAudioContext(); // Ambil context dari AudioContext
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
@@ -78,6 +79,8 @@ const ModifyVoiceScreen = () => {
     if (fileAudioReference1) {
       const { ipcRenderer } = window.require("electron");
 
+      setIsConvertion1Loading(true);
+
       // Path input (enhanced speaker audio) and target audio (from file dialog)
       const inputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_1.wav"; 
       const targetAudioPath = fileAudioReference1.path;
@@ -95,6 +98,7 @@ const ModifyVoiceScreen = () => {
       ipcRenderer.once("voice-conversion-complete", (event, data) => {
         console.log("Conversion feedback:", data);
         setConvertedFile1({ path: data.convertedAudioPaths.speaker1 }); // Menyimpan path hasil konversi
+        setIsConvertion1Loading(false)
       });
     }
   };
@@ -105,6 +109,8 @@ const ModifyVoiceScreen = () => {
 
     if (fileAudioReference2) {
       const { ipcRenderer } = window.require("electron");
+
+      setIsConvertion2Loading(true)
 
       // Path input (enhanced speaker audio) and target audio (from file dialog)
       const inputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_2.wav"; 
@@ -123,6 +129,7 @@ const ModifyVoiceScreen = () => {
       ipcRenderer.once("voice-conversion-complete", (event, data) => {
         console.log("Conversion feedback:", data);
         setConvertedFile2({ path: data.convertedAudioPaths.speaker2 }); // Menyimpan path hasil konversi
+        setIsConvertion2Loading(false)
       });
     }
   };
@@ -244,6 +251,7 @@ const ModifyVoiceScreen = () => {
               file={convertedFile1} // Show the converted file
               setFile={setConvertedFile1}
               isPreview={true} // Set to true for preview
+              isLoading={isConvertion1Loading}
             />
           )}
         </Grid>
@@ -356,6 +364,7 @@ const ModifyVoiceScreen = () => {
               file={convertedFile2} // Show the converted file
               setFile={setConvertedFile2}
               isPreview={true} // Set to true for preview
+              isLoading={isConvertion2Loading}
             />
           )}
         </Grid>

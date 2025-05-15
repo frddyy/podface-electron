@@ -26,6 +26,9 @@ export const FaceModelProvider = ({ children }) => {
   const [finalFace1, setFinalFace1] = useState(null); // Final face untuk Speaker 1
   const [finalFace2, setFinalFace2] = useState(null); // Final face untuk Speaker 2
 
+  const [isReconstruction1Loading, setIsReconstruction1Loading] = useState(false);
+  const [isReconstruction2Loading, setIsReconstruction2Loading] = useState(false);
+
   // Fungsi untuk menentukan final face berdasarkan kondisi
   const setFinalFace = () => {
     // Tentukan final face untuk speaker 1
@@ -75,6 +78,10 @@ export const FaceModelProvider = ({ children }) => {
         setFinalFace1,
         setFinalFace2,
         setFinalFace,
+        isReconstruction1Loading, 
+        setIsReconstruction1Loading,
+        isReconstruction2Loading, 
+        setIsReconstruction2Loading,
       }}
     >
       {children}

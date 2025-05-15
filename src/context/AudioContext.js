@@ -15,6 +15,9 @@ export const AudioProvider = ({ children }) => {
   const [fileAudioReference2, setFileAudioReference2] = useState(null); // File untuk Speaker 2 (referensi konversi)
   const [convertedFile1, setConvertedFile1] = useState(null); // File hasil konversi Speaker 1
   const [convertedFile2, setConvertedFile2] = useState(null); // File hasil konversi Speaker 2
+  const [isSeparationLoading, setIsSeparationLoading] = useState(false);
+  const [isConvertion1Loading, setIsConvertion1Loading] = useState(false);
+  const [isConvertion2Loading, setIsConvertion2Loading] = useState(false);
 
   // Fungsi untuk menentukan final audio berdasarkan kondisi
   const setFinalAudio = () => {
@@ -57,6 +60,12 @@ export const AudioProvider = ({ children }) => {
         setConvertedFile1,
         convertedFile2,
         setConvertedFile2,
+        isSeparationLoading,
+        setIsSeparationLoading,
+        isConvertion1Loading,
+        setIsConvertion1Loading,
+        isConvertion2Loading,
+        setIsConvertion2Loading,
       }}
     >
       {children}

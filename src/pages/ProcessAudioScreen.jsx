@@ -5,7 +5,7 @@ import CustomField from "../components/CustomField";
 import { useAudioContext } from "../context/AudioContext";
 
 const ProcessAudioScreen = () => {
-  const { fileAudioPodcast, setFileAudioPodcast, separatedAudioFiles, setSeparatedAudioFiles } = useAudioContext(); // Ambil context dari AudioContext
+  const { fileAudioPodcast, setFileAudioPodcast, separatedAudioFiles, setSeparatedAudioFiles, isSeparationLoading, setIsSeparationLoading } = useAudioContext(); // Ambil context dari AudioContext
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const theme = useTheme();
@@ -40,6 +40,8 @@ const ProcessAudioScreen = () => {
       const audioPath = fileAudioPodcast.path;
       console.log("audioPath: ", audioPath);
 
+      setIsSeparationLoading(true);
+
       const { ipcRenderer } = window.require("electron");
 
       ipcRenderer.send("separate-audio", { audioPath });
@@ -54,6 +56,8 @@ const ProcessAudioScreen = () => {
           speaker1: data.enhancedSpeaker1,
           speaker2: data.enhancedSpeaker2,
         });
+
+        setIsSeparationLoading(false);
       });
     }
   };
@@ -150,6 +154,7 @@ const ProcessAudioScreen = () => {
               file={{ path: separatedAudioFiles.speaker1 }}
               setFile={setSeparatedAudioFiles}
               isPreview={true} // Show preview section after file is uploaded
+              isLoading={isSeparationLoading}
               sx={{ marginBottom: 2 }} // Add space between speakers
             />
         </Box>
@@ -161,6 +166,7 @@ const ProcessAudioScreen = () => {
               file={{ path: separatedAudioFiles.speaker2 }}
               setFile={setSeparatedAudioFiles}
               isPreview={true} // Show preview section after file is uploaded
+              isLoading={isSeparationLoading}
             />
         </Box>
       </Grid>

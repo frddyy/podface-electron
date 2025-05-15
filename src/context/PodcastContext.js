@@ -7,6 +7,7 @@ const PodcastContext = createContext();
 export const PodcastProvider = ({ children }) => {
   const [videoPodcastFile, setVideoPodcastFile] = useState(null);  // Menyimpan file hasil merge video dan audio
   const [isPodcastMerged, setIsPodcastMerged] = useState(false);   // Status apakah video podcast sudah berhasil digabung
+  const [isGeneratePodcastLoading, setIsGeneratePodcastLoading] = useState(false);
 
   useEffect(() => {
     if (videoPodcastFile === null) {
@@ -23,6 +24,8 @@ export const PodcastProvider = ({ children }) => {
         setVideoPodcastFile,
         isPodcastMerged,
         setIsPodcastMerged,
+        isGeneratePodcastLoading, 
+        setIsGeneratePodcastLoading,
       }}
     >
       {children}

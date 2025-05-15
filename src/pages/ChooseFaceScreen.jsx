@@ -20,7 +20,9 @@ const ChooseFaceScreen = () => {
     imageFile2, setImageFile2,
     reconstructedFile2, setReconstructedFile2,
     templateFile2, setTemplateFile2,
-    setFinalFace // Function to set the final face model
+    setFinalFace,
+    isReconstruction1Loading, setIsReconstruction1Loading,
+    isReconstruction2Loading, setIsReconstruction2Loading
   } = useFaceModelContext(); // Get context values and functions
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
@@ -85,6 +87,8 @@ const ChooseFaceScreen = () => {
       console.error("No image file uploaded for Speaker 1.");
       return;
     }
+
+    setIsReconstruction1Loading(true)
   
     const imageFolder = imageFile1.path; 
     const outputFolder = "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/";
@@ -102,6 +106,7 @@ const ChooseFaceScreen = () => {
       // console.log("Face reconstruction feedback:", data);
       console.log("Face reconstruction and postprocessing successfull");
       setReconstructedFile1({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_1.ply" });
+      setIsReconstruction1Loading(false)
     });
   };
 
@@ -136,6 +141,8 @@ const ChooseFaceScreen = () => {
       return;
     }
   
+    setIsReconstruction2Loading(true)
+
     const imageFolder = imageFile2.path; 
     const outputFolder = "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/";
     const speaker = 'speaker_2'; 
@@ -151,6 +158,7 @@ const ChooseFaceScreen = () => {
     ipcRenderer.once("face-postprocessing-complete", (event, data) => {
       console.log("Face reconstruction and postprocessing successfull");
       setReconstructedFile2({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_2.ply" });
+      setIsReconstruction2Loading(false)
     });
   };
 
@@ -311,13 +319,14 @@ const ChooseFaceScreen = () => {
               {/* Right side: Reconstructed 3D Face Model */}
               <Grid item xs={6}>
                 {/* This is shown if the user is not using the template */}
-                {!isUseTemplate1 && reconstructedFile1 && (
+                {!isUseTemplate1 && (
                   <CustomField
                     mode="3d"
                     labelText="Reconstructed 3D Face Model"
                     file={reconstructedFile1}
                     setFile={setReconstructedFile1}
                     isPreview={true} // Show preview
+                    isLoading={isReconstruction1Loading}
                   />
                 )}
               </Grid>
@@ -469,13 +478,14 @@ const ChooseFaceScreen = () => {
               {/* Right side: Reconstructed 3D Face Model */}
               <Grid item xs={6}>
                 {/* This is shown if the user is not using the template */}
-                {!isUseTemplate2 && reconstructedFile2 && (
+                {!isUseTemplate2 && (
                   <CustomField
                     mode="3d"
                     labelText="Reconstructed 3D Face Model"
                     file={reconstructedFile2}
                     setFile={setReconstructedFile2}
                     isPreview={true} // Show preview
+                    isLoading={isReconstruction2Loading}
                   />
                 )}
               </Grid>

@@ -6,7 +6,7 @@ import { usePodcastContext } from '../context/PodcastContext';
 import { useAudioContext } from '../context/AudioContext';
 import { useRenderContext } from '../context/RenderContext';
 const ResultScreen = () => {
-  const { videoPodcastFile, setVideoPodcastFile, isPodcastMerged } = usePodcastContext();
+  const { videoPodcastFile, setVideoPodcastFile, isPodcastMerged, isGeneratePodcastLoading, setIsGeneratePodcastLoading } = usePodcastContext();
   const { finalAudio1, finalAudio2 } = useAudioContext();
   const { videoFile1, videoFile2 } = useRenderContext();
   const theme = useTheme();
@@ -19,6 +19,8 @@ const ResultScreen = () => {
     // Path for the combined audio file
     const combinedAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/combined_audio.wav";
     const outputPath = "/home/daffaraihandika/TA/podface-electron/src/assets/video/final_podcast.mp4";
+
+    setIsGeneratePodcastLoading(true);
 
     // Menggabungkan audio
     ipcRenderer.send("combine-audio", {
@@ -43,6 +45,7 @@ const ResultScreen = () => {
 
         // Set video file for podcast and trigger necessary updates
         setVideoPodcastFile({ path: data.output });
+        setIsGeneratePodcastLoading(false);
       });
     });
   };
@@ -73,6 +76,7 @@ const ResultScreen = () => {
           isPreview={true}
           file={videoPodcastFile}
           setFile={setVideoPodcastFile}
+          isLoading={isGeneratePodcastLoading}
         />
       </Box>
 

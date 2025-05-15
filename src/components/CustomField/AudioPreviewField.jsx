@@ -1,10 +1,10 @@
 import React from "react";
 import ReactPlayer from "react-player/lazy"; // Import ReactPlayer
-import { Box } from "@mui/material"; // Use MUI Box and Typography for styling
+import { Box, CircularProgress } from "@mui/material"; // Use MUI Box and Typography for styling
 import { MusicNote } from "@mui/icons-material"; // Corrected import
 import { useTheme } from "@mui/material/styles";
 
-const AudioPreviewField = ({ file }) => {
+const AudioPreviewField = ({ file, isLoading }) => {
   const theme = useTheme();
   // Tambahkan "file://" jika belum ada pada path file
   const fileUrl = file && file.path ? `file://${file.path}` : null;
@@ -14,8 +14,25 @@ const AudioPreviewField = ({ file }) => {
 
   return (
     <div style={{ width: "100%", height: "50px" }}>
-      {/* Check if file is available */}
-      {isValidFile ? (
+      {isLoading ? (
+        <Box
+          sx={{
+            width: "100",
+            height: "100",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid",
+            padding: "70px 120px",
+            borderRadius: theme.shape.borderRadius,
+            borderColor: theme.palette.neutral.dark,
+            color: theme.palette.neutral.dark,
+            backgroundColor: theme.palette.background.form,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : isValidFile ? (
         // Display the audio player if the file is available and valid
         <ReactPlayer
           url={fileUrl}

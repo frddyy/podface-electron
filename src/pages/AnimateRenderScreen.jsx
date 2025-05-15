@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Box, Grid, Typography, Divider, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAudioContext } from "../context/AudioContext";
@@ -9,7 +9,7 @@ import CustomField from "../components/CustomField";
 const AnimateRenderScreen = () => {
   const theme = useTheme();
 
-  const { isSpeaker1Rendered, setIsSpeaker1Rendered, isSpeaker2Rendered, setIsSpeaker2Rendered, videoFile1, setVideoFile1, videoFile2, setVideoFile2 } = useRenderContext();
+  const { setIsSpeaker1Rendered, setIsSpeaker2Rendered, isSpeaker1Rendered, isSpeaker2Rendered, videoFile1, setVideoFile1, videoFile2, setVideoFile2, isRendering1Loading, setIsRendering1Loading, isRendering2Loading, setIsRendering2Loading } = useRenderContext();
 
   const { finalAudio1, finalAudio2, setFinalAudio1, setFinalAudio2 } = useAudioContext(); // Ambil final audio dari context
   const { finalFace1, finalFace2, setFinalFace1, setFinalFace2 } = useFaceModelContext(); // Ambil final face dari context
@@ -18,6 +18,9 @@ const AnimateRenderScreen = () => {
     console.log("Running VOCA for Speaker 1...");
   
     const { ipcRenderer } = window.require("electron");
+
+    setIsRendering1Loading(true);
+    setIsSpeaker1Rendered(true);
   
     // Define the paths for VOCA arguments
     const audioPath = finalAudio1.path;
@@ -37,6 +40,7 @@ const AnimateRenderScreen = () => {
       setVideoFile1({
         path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
+      setIsRendering1Loading(false);
     });
   };
 
@@ -44,6 +48,9 @@ const AnimateRenderScreen = () => {
     console.log("Running VOCA for Speaker 2...");
   
     const { ipcRenderer } = window.require("electron");
+
+    setIsRendering2Loading(true);
+    setIsSpeaker2Rendered(true);
   
     // Define the paths for VOCA arguments
     const audioPath = finalAudio2.path;
@@ -63,6 +70,7 @@ const AnimateRenderScreen = () => {
       setVideoFile2({
         path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
+      setIsRendering2Loading(false);
     });
   };
 
@@ -104,7 +112,7 @@ const AnimateRenderScreen = () => {
         </Typography>
 
         {/* Show CustomField for Face and Audio if rendered, else show video */}
-        {!isSpeaker1Rendered ? (
+        {!isSpeaker1Rendered && (
           <>
             <Box sx={{ marginBottom: 2 }}>
               <CustomField
@@ -147,19 +155,18 @@ const AnimateRenderScreen = () => {
               )}
             </Box>
           </>
-        ) : (
-          // Tampilkan video atau konten lain jika animasi belum dirender
-          <Box sx={{ marginBottom: 2 }}>
-            <CustomField
-              mode="video"
-              labelText="Render Animation"
-              file={videoFile1} // Placeholder for video input
-              setFile={setVideoFile1} // Set function can be empty as this is for video render placeholder
-              isPreview={true} // Show video for preview before rendering
-            />
-          </Box>
+        )} 
+
+        {(isRendering1Loading || isSpeaker1Rendered) && (
+          <CustomField
+            mode="video"
+            labelText="Render Animation"
+            file={videoFile1} // Placeholder for video input
+            setFile={setVideoFile1} // Set function can be empty as this is for video render placeholder
+            isPreview={true} // Show video for preview before rendering
+            isLoading={isRendering1Loading} // Show loading spinner when rendering
+          />
         )}
-    
       </Grid>
 
       {/* Divider with white color */}
@@ -191,7 +198,7 @@ const AnimateRenderScreen = () => {
           Speaker 2
         </Typography>
 
-        {!isSpeaker2Rendered ? (
+        {!isSpeaker2Rendered && (
           <>
             <Box sx={{ marginBottom: 2 }}>
               <CustomField
@@ -233,9 +240,10 @@ const AnimateRenderScreen = () => {
                 </Button>
               )}
             </Box>
-        </>
-        ) : (
-          // Tampilkan video atau konten lain jika animasi belum dirender
+          </>
+        )} 
+        
+        {(isRendering2Loading || isSpeaker2Rendered) && (
           <Box sx={{ marginBottom: 2 }}>
             <CustomField
               mode="video"
@@ -243,6 +251,7 @@ const AnimateRenderScreen = () => {
               file={videoFile2} // Placeholder for video input
               setFile={setVideoFile2} // Set function can be empty as this is for video render placeholder
               isPreview={true} // Show video for preview before rendering
+              isLoading={isRendering2Loading}
             />
           </Box>
         )}  

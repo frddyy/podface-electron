@@ -9,6 +9,9 @@ export const RenderProvider = ({ children }) => {
   const [isSpeaker1Rendered, setIsSpeaker1Rendered] = useState(false);
   const [isSpeaker2Rendered, setIsSpeaker2Rendered] = useState(false);
 
+  const [isRendering1Loading, setIsRendering1Loading] = useState(false);
+  const [isRendering2Loading, setIsRendering2Loading] = useState(false);
+
   // State untuk menyimpan file video untuk masing-masing speaker
   const [videoFile1, setVideoFile1] = useState(null);
   const [videoFile2, setVideoFile2] = useState(null);
@@ -40,6 +43,10 @@ export const RenderProvider = ({ children }) => {
         setVideoFile1,
         videoFile2,
         setVideoFile2,
+        isRendering1Loading, 
+        setIsRendering1Loading,
+        isRendering2Loading, 
+        setIsRendering2Loading
       }}
     >
       {children}

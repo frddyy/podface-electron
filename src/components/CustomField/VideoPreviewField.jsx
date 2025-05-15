@@ -1,10 +1,10 @@
 import React from "react";
 import ReactPlayer from "react-player/lazy"; // Import ReactPlayer
-import { Box } from "@mui/material"; // Use MUI Box and Typography for styling
+import { Box, CircularProgress } from "@mui/material"; // Use MUI Box and Typography for styling
 import { VideoLibrary } from "@mui/icons-material"; // Corrected import for video
 import { useTheme } from "@mui/material/styles";
 
-const VideoPreviewField = ({ file }) => {
+const VideoPreviewField = ({ file, isLoading }) => {
   const theme = useTheme();
   
   // Check if the file is a valid video object
@@ -18,8 +18,26 @@ const VideoPreviewField = ({ file }) => {
 
   return (
     <div style={{ width: "100%", height: "50px" }}>
-      {/* Check if the video file is valid */}
-      {isValidFile ? (
+      {isLoading ? (
+        // Show CircularProgress spinner when loading is true
+        <Box
+          sx={{
+            width: "100",
+            height: "100",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid",
+            padding: "70px 120px",
+            borderRadius: theme.shape.borderRadius,
+            borderColor: theme.palette.neutral.dark,
+            color: theme.palette.neutral.dark,
+            backgroundColor: theme.palette.background.form,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : isValidFile ? (
         // Display the video player if the file is available and valid
         <ReactPlayer
           url={fileUrl}
