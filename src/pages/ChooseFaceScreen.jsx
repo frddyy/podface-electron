@@ -27,6 +27,7 @@ const ChooseFaceScreen = () => {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
@@ -72,6 +73,7 @@ const ChooseFaceScreen = () => {
     ipcRenderer.once("invalid-image-file", (event, data) => {
       // If the file is invalid, show an error message in Snackbar
       setSnackbarMessage(data.message);
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     });
   };
@@ -106,6 +108,9 @@ const ChooseFaceScreen = () => {
       // console.log("Face reconstruction feedback:", data);
       console.log("Face reconstruction and postprocessing successfull");
       setReconstructedFile1({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_1.ply" });
+      setSnackbarMessage("Face reconstruction for speaker 1 completed successfully!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
       setIsReconstruction1Loading(false)
     });
   };
@@ -125,6 +130,7 @@ const ChooseFaceScreen = () => {
     ipcRenderer.once("invalid-image-file", (event, data) => {
       // If the file is invalid, show an error message in Snackbar
       setSnackbarMessage(data.message);
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     });
   };
@@ -158,6 +164,9 @@ const ChooseFaceScreen = () => {
     ipcRenderer.once("face-postprocessing-complete", (event, data) => {
       console.log("Face reconstruction and postprocessing successfull");
       setReconstructedFile2({ path: "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/transformed_speaker_2.ply" });
+      setSnackbarMessage("Face reconstruction for speaker 2 completed successfully!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
       setIsReconstruction2Loading(false)
     });
   };
@@ -510,13 +519,13 @@ const ChooseFaceScreen = () => {
           </>
         )}
       </Grid>
-      {/* Snackbar for invalid file format */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" variant="filled" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} variant="filled" sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

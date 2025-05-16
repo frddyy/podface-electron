@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Box, Grid, Typography, Divider, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Grid, Typography, Divider, Button, Snackbar, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAudioContext } from "../context/AudioContext";
 import { useFaceModelContext } from "../context/FaceModelContext";
@@ -10,9 +10,12 @@ const AnimateRenderScreen = () => {
   const theme = useTheme();
 
   const { setIsSpeaker1Rendered, setIsSpeaker2Rendered, isSpeaker1Rendered, isSpeaker2Rendered, videoFile1, setVideoFile1, videoFile2, setVideoFile2, isRendering1Loading, setIsRendering1Loading, isRendering2Loading, setIsRendering2Loading } = useRenderContext();
-
   const { finalAudio1, finalAudio2, setFinalAudio1, setFinalAudio2 } = useAudioContext(); // Ambil final audio dari context
   const { finalFace1, finalFace2, setFinalFace1, setFinalFace2 } = useFaceModelContext(); // Ambil final face dari context
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);  
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const handleApplyClick1 = () => {
     console.log("Running VOCA for Speaker 1...");
@@ -40,6 +43,9 @@ const AnimateRenderScreen = () => {
       setVideoFile1({
         path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
+      setSnackbarMessage("Facial animation for speaker 1 completed successfully!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
       setIsRendering1Loading(false);
     });
   };
@@ -70,6 +76,9 @@ const AnimateRenderScreen = () => {
       setVideoFile2({
         path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
+      setSnackbarMessage("Facial animation for speaker 2 completed successfully!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
       setIsRendering2Loading(false);
     });
   };
@@ -81,6 +90,10 @@ const AnimateRenderScreen = () => {
     console.log("Final Face Speaker 1:", finalFace1);
     console.log("Final Face Speaker 2:", finalFace2);
   }, [finalAudio1, finalAudio2, finalFace1, finalFace2]); 
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
 
   return (
     <Grid
@@ -256,6 +269,16 @@ const AnimateRenderScreen = () => {
           </Box>
         )}  
       </Grid>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} variant="filled" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 }

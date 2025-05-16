@@ -21,6 +21,7 @@ const ModifyVoiceScreen = () => {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   useEffect(() => {
     console.log("Converted file 1:", convertedFile1);
@@ -50,6 +51,7 @@ const ModifyVoiceScreen = () => {
     ipcRenderer.once("invalid-audio-file", (event, data) => {
       // If the file is invalid, show an error message in Snackbar
       setSnackbarMessage(data.message);
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     });
   };
@@ -68,6 +70,7 @@ const ModifyVoiceScreen = () => {
     ipcRenderer.once("invalid-audio-file", (event, data) => {
       // If the file is invalid, show an error message in Snackbar
       setSnackbarMessage(data.message);
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     });
   };
@@ -98,6 +101,9 @@ const ModifyVoiceScreen = () => {
       ipcRenderer.once("voice-conversion-complete", (event, data) => {
         console.log("Conversion feedback:", data);
         setConvertedFile1({ path: data.convertedAudioPaths.speaker1 }); // Menyimpan path hasil konversi
+        setSnackbarMessage("Voice conversion for speaker 1 completed successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
         setIsConvertion1Loading(false)
       });
     }
@@ -129,6 +135,9 @@ const ModifyVoiceScreen = () => {
       ipcRenderer.once("voice-conversion-complete", (event, data) => {
         console.log("Conversion feedback:", data);
         setConvertedFile2({ path: data.convertedAudioPaths.speaker2 }); // Menyimpan path hasil konversi
+        setSnackbarMessage("Voice conversion for speaker 2 completed successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
         setIsConvertion2Loading(false)
       });
     }
@@ -369,13 +378,13 @@ const ModifyVoiceScreen = () => {
           )}
         </Grid>
       </Grid>
-      {/* Snackbar for invalid file format */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }} 
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" variant="filled" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} variant="filled" sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

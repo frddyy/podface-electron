@@ -8,6 +8,7 @@ const ProcessAudioScreen = () => {
   const { fileAudioPodcast, setFileAudioPodcast, separatedAudioFiles, setSeparatedAudioFiles, isSeparationLoading, setIsSeparationLoading } = useAudioContext(); // Ambil context dari AudioContext
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const theme = useTheme();
 
   useEffect(() => {
@@ -30,6 +31,7 @@ const ProcessAudioScreen = () => {
     ipcRenderer.once("invalid-audio-file", (event, data) => {
       // If the file is invalid, show an error message in Snackbar
       setSnackbarMessage(data.message);
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     });
   };
@@ -56,6 +58,9 @@ const ProcessAudioScreen = () => {
           speaker1: data.enhancedSpeaker1,
           speaker2: data.enhancedSpeaker2,
         });
+        setSnackbarMessage("Audio separation & enhancement completed successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
 
         setIsSeparationLoading(false);
       });
@@ -170,13 +175,13 @@ const ProcessAudioScreen = () => {
             />
         </Box>
       </Grid>
-      {/* Snackbar for invalid file format */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }} 
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" variant="filled" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} variant="filled" sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Grid, Typography, Box, Button } from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import { Grid, Typography, Box, Button, Snackbar, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CustomField from "../components/CustomField"; // Pastikan CustomField disesuaikan untuk video
 import { usePodcastContext } from '../context/PodcastContext';
@@ -9,6 +9,11 @@ const ResultScreen = () => {
   const { videoPodcastFile, setVideoPodcastFile, isPodcastMerged, isGeneratePodcastLoading, setIsGeneratePodcastLoading } = usePodcastContext();
   const { finalAudio1, finalAudio2 } = useAudioContext();
   const { videoFile1, videoFile2 } = useRenderContext();
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);  
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
   const theme = useTheme();
 
   const handleGenerate = () => {
@@ -53,6 +58,10 @@ const ResultScreen = () => {
   useEffect(() => {
     console.log("Current videoPodcastFile: ", videoPodcastFile);
   }, [videoPodcastFile]);
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
 
   return (
     <Grid
