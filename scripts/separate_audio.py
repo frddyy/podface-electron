@@ -4,13 +4,19 @@ from speechbrain.inference.separation import SepformerSeparation as separator
 from scipy.io.wavfile import write
 import numpy as np
 import os
+from scripts.utils import is_valid_wav_file
 
 # Define output folder
-output_folder = './speechbrain/output'
+output_folder = './speechbrain/output' # speechbrain/output
 os.makedirs(output_folder, exist_ok=True)  # Create folder if it doesn't exist
 
 # Function for separating audio into multiple speakers
 def separate_audio(audio_path, output_folder):
+    # Validate the WAV file before processing
+    if not is_valid_wav_file(audio_path):
+        print(f"Audio file {audio_path} is not valid. Please provide a valid .wav audio file.")
+        return None, None
+
     # Initialize the Sepformer model for separation
     model = separator.from_hparams(source="speechbrain/sepformer-wham", savedir='pretrained_models/sepformer-wham')
 
@@ -25,7 +31,7 @@ def separate_audio(audio_path, output_folder):
     write(os.path.join(output_folder, "speaker_1.wav"), rate, (speaker_1 * 32767).astype('int16'))
     write(os.path.join(output_folder, "speaker_2.wav"), rate, (speaker_2 * 32767).astype('int16'))
 
-    print("Separation complete!")
+    print("Speech separation completed successfully!")
     print(f"- speaker_1.wav")
     print(f"- speaker_2.wav")
     

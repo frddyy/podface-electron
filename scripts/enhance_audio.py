@@ -22,7 +22,7 @@ def enhance_audio(speaker_1_path, speaker_2_path, output_folder):
     enhanced_2 = enhanced_speech_2.detach().cpu().squeeze().numpy()
     write(os.path.join(output_folder, "enhanced_speaker_2.wav"), 8000, (enhanced_2 * 32767).astype('int16'))
 
-    print("Enhancement complete!")
+    print("Speech enhancement completed successfully!")
     print(f"- enhanced_speaker_1.wav")
     print(f"- enhanced_speaker_2.wav")
 
