@@ -2,6 +2,7 @@ import sys
 from speechbrain.inference.separation import SepformerSeparation as separator
 from scipy.io.wavfile import write
 import os
+from scripts.utils import is_valid_wav_file
 
 # Define output folder
 output_folder = './speechbrain/output'
@@ -9,6 +10,11 @@ os.makedirs(output_folder, exist_ok=True)  # Create folder if it doesn't exist
 
 # Function for enhancing the separated audio (Speaker 1 and Speaker 2)
 def enhance_audio(speaker_1_path, speaker_2_path, output_folder):
+    # Validate input files before processing
+    if not is_valid_wav_file(speaker_1_path) or not is_valid_wav_file(speaker_2_path):
+        print(f"One or both audio files are not valid. Please provide valid .wav audio files.")
+        return None, None
+
     # Initialize the Sepformer model for enhancement
     model_enhance = separator.from_hparams(source="speechbrain/sepformer-whamr-enhancement", savedir='pretrained_models/sepformer-whamr-enhancement4')
 
