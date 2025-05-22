@@ -1,6 +1,7 @@
 import os
 import pytest
-from scripts.separate_audio import separate_audio
+from separate_audio import separate_audio
+
 
 # Path output folder sama dengan yang di script separate_audio.py
 OUTPUT_FOLDER = './speechbrain/output'

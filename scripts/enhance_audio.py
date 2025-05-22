@@ -2,7 +2,7 @@ import sys
 from speechbrain.inference.separation import SepformerSeparation as separator
 from scipy.io.wavfile import write
 import os
-from scripts.utils import is_valid_wav_file
+from utils import is_valid_wav_file
 
 # Define output folder
 output_folder = './speechbrain/output'

@@ -1,6 +1,6 @@
 import os
 import pytest
-from scripts.utils import is_valid_wav_file
+from utils import is_valid_wav_file
 
 def test_valid_wav_file():
     """

@@ -448,3 +448,7 @@ function replaceExistingOutputFile(animationOutputPath) {
     console.log(`Direktori ${animationOutputPath} tidak ditemukan.`);
   }
 }
+
+module.exports = {
+  isValidWavFile,
+};

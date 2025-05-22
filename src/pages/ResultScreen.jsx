@@ -50,6 +50,9 @@ const ResultScreen = () => {
 
         // Set video file for podcast and trigger necessary updates
         setVideoPodcastFile({ path: data.output });
+        setSnackbarMessage("Generate podcast video completed successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
         setIsGeneratePodcastLoading(false);
       });
     });
@@ -114,6 +117,16 @@ const ResultScreen = () => {
           </Button>
         </Box>
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} variant="filled" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 };

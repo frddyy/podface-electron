@@ -1,6 +1,6 @@
 import os
 import pytest
-from scripts.enhance_audio import enhance_audio
+from enhance_audio import enhance_audio
 
 OUTPUT_FOLDER = './speechbrain/output'
 
