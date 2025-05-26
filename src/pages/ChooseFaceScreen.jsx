@@ -113,6 +113,23 @@ const ChooseFaceScreen = () => {
       setSnackbarOpen(true);
       setIsReconstruction1Loading(false)
     });
+
+    // Feedback ketika terjadi error
+    ipcRenderer.once("Error during 3D face reconstruction processing", (event, data) => {
+      console.error("3D face reconstruction error:", data.error);
+      setSnackbarMessage(`Error during 3D face reconstruction: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsReconstruction1Loading(false);
+    });
+
+    ipcRenderer.once("Error during face postprocessing", (event, data) => {
+      console.error("Face postprocessing error:", data.error);
+      setSnackbarMessage(`Error during face postprocessing: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsReconstruction1Loading(false);
+    });
   };
 
   // Function to handle opening file dialog for Speaker 2 (Image upload)
@@ -168,6 +185,23 @@ const ChooseFaceScreen = () => {
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
       setIsReconstruction2Loading(false)
+    });
+
+    // Feedback ketika terjadi error
+    ipcRenderer.once("Error during 3D face reconstruction processing", (event, data) => {
+      console.error("3D face reconstruction error:", data.error);
+      setSnackbarMessage(`Error during 3D face reconstruction: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsReconstruction2Loading(false);
+    });
+
+    ipcRenderer.once("Error during face postprocessing", (event, data) => {
+      console.error("Face postprocessing error:", data.error);
+      setSnackbarMessage(`Error during face postprocessing: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsReconstruction2Loading(false);
     });
   };
 
@@ -351,8 +385,14 @@ const ChooseFaceScreen = () => {
                 maxWidth: 100,
                 alignSelf: "flex-end", // Align to the right
                 marginTop: 2, // Optional: space between components
+                "&.Mui-disabled": {
+                  backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                  color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                  borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                  opacity: 0.5
+                },
               }}
-              disabled={!imageFile1}
+              disabled={!imageFile1 || isReconstruction1Loading || isReconstruction2Loading}
               onClick={handleApplyClick1}
             >
               Apply
@@ -510,8 +550,14 @@ const ChooseFaceScreen = () => {
                 maxWidth: 100,
                 alignSelf: "flex-end", // Align to the right
                 marginTop: 2, // Optional: space between components
+                "&.Mui-disabled": {
+                  backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                  color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                  borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                  opacity: 0.5
+                },
               }}
-              disabled={!imageFile2}
+              disabled={!imageFile2 || isReconstruction1Loading || isReconstruction2Loading}
               onClick={handleApplyClick2}
             >
               Apply

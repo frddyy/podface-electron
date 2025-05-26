@@ -61,7 +61,23 @@ const ProcessAudioScreen = () => {
         setSnackbarMessage("Audio separation & enhancement completed successfully!");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
+        setIsSeparationLoading(false);
+      });
 
+      // Feedback ketika terjadi error
+      ipcRenderer.once("Error executing audio separation", (event, data) => {
+        console.error("Speech separation error:", data.error);
+        setSnackbarMessage(`Error during speech separation: ${data.error}`);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        setIsSeparationLoading(false);
+      });
+
+      ipcRenderer.once("Error executing audio enhancement", (event, data) => {
+        console.error("Speech enhancement error:", data.error);
+        setSnackbarMessage(`Error during speech enhancement: ${data.error}`);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
         setIsSeparationLoading(false);
       });
     }

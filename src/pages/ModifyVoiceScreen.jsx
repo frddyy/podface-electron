@@ -24,8 +24,8 @@ const ModifyVoiceScreen = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   useEffect(() => {
-    console.log("Converted file 1:", convertedFile1);
-  }, [convertedFile1]); 
+    console.log("separatedAudioFiles:", separatedAudioFiles);
+  }, [separatedAudioFiles]); 
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
@@ -106,6 +106,15 @@ const ModifyVoiceScreen = () => {
         setSnackbarOpen(true);
         setIsConvertion1Loading(false)
       });
+
+      // Feedback ketika terjadi error
+      ipcRenderer.once("Error during voice conversion", (event, data) => {
+        console.error("Voice conversion error:", data.error);
+        setSnackbarMessage(`Error during voice conversion: ${data.error}`);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        setIsConvertion1Loading(false);
+      });
     }
   };
 
@@ -139,6 +148,15 @@ const ModifyVoiceScreen = () => {
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
         setIsConvertion2Loading(false)
+      });
+
+      // Feedback ketika terjadi error
+      ipcRenderer.once("Error during voice conversion", (event, data) => {
+        console.error("Voice conversion error:", data.error);
+        setSnackbarMessage(`Error during voice conversion: ${data.error}`);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        setIsConvertion1Loading(false);
       });
     }
   };
@@ -245,7 +263,7 @@ const ModifyVoiceScreen = () => {
                   opacity: 0.5
                 },
               }}
-              disabled={!fileAudioReference1} // Disable button if no file is uploaded
+              disabled={isConvertion1Loading || isConvertion2Loading || !fileAudioReference1 || !separatedAudioFiles.speaker1}
               onClick={handleApplyClick1}
             >
               Apply
@@ -358,7 +376,7 @@ const ModifyVoiceScreen = () => {
                   opacity: 0.5
                 },
               }}
-              disabled={!fileAudioReference2} // Disable button if no file is uploaded
+              disabled={isConvertion1Loading || isConvertion2Loading || !fileAudioReference2 || !separatedAudioFiles.speaker2}
               onClick={handleApplyClick2}
             >
               Apply

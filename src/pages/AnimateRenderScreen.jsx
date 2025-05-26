@@ -38,15 +38,40 @@ const AnimateRenderScreen = () => {
     });
   
     // Listen for feedback from the VOCA process
-    ipcRenderer.once("voca-processing-complete", (event, data) => {
+    ipcRenderer.once("animation-complete", (event, data) => {
       console.log(data.message); // Handle the success message
       setVideoFile1({
-        path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
+        path: `${outputPath}/eye_blink/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
       setSnackbarMessage("Facial animation for speaker 1 completed successfully!");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
       setIsRendering1Loading(false);
+    });
+
+    // Feedback ketika terjadi error
+    ipcRenderer.once("Error executing VOCA script", (event, data) => {
+      console.error("Create facial animation error:", data.error);
+      setSnackbarMessage(`Error during create facial animation: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsRendering2Loading(false);
+    });
+
+    ipcRenderer.once("Error adding eye blink", (event, data) => {
+      console.error("Add eye blink attribute error:", data.error);
+      setSnackbarMessage(`Error during adding eye blink: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsRendering2Loading(false);
+    });
+
+    ipcRenderer.once("Error visualizing sequence", (event, data) => {
+      console.error("Visualizing animation error:", data.error);
+      setSnackbarMessage(`Error during visualizing animation: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsRendering2Loading(false);
     });
   };
 
@@ -71,13 +96,38 @@ const AnimateRenderScreen = () => {
     });
   
     // Listen for feedback from the VOCA process
-    ipcRenderer.once("voca-processing-complete", (event, data) => {
+    ipcRenderer.once("animation-complete", (event, data) => {
       console.log(data.message); // Handle the success message
       setVideoFile2({
-        path: `${outputPath}/video.mp4`  // Assuming `data.outputPath` contains the correct output path
+        path: `${outputPath}/eye_blink/video.mp4`  // Assuming `data.outputPath` contains the correct output path
       });
       setSnackbarMessage("Facial animation for speaker 2 completed successfully!");
       setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      setIsRendering2Loading(false);
+    });
+
+    // Feedback ketika terjadi error
+    ipcRenderer.once("Error executing VOCA script", (event, data) => {
+      console.error("Create facial animation error:", data.error);
+      setSnackbarMessage(`Error during create facial animation: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsRendering2Loading(false);
+    });
+
+    ipcRenderer.once("Error adding eye blink", (event, data) => {
+      console.error("Add eye blink attribute error:", data.error);
+      setSnackbarMessage(`Error during adding eye blink: ${data.error}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setIsRendering2Loading(false);
+    });
+
+    ipcRenderer.once("Error visualizing sequence", (event, data) => {
+      console.error("Visualizing animation error:", data.error);
+      setSnackbarMessage(`Error during visualizing animation: ${data.error}`);
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
       setIsRendering2Loading(false);
     });
@@ -159,8 +209,14 @@ const AnimateRenderScreen = () => {
                     fontWeight: 600,
                     textTransform: "none",
                     maxWidth: 100,
+                    "&.Mui-disabled": {
+                      backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                      color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                      borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                      opacity: 0.5
+                    },
                   }}
-                  disabled={!(finalAudio1 && finalFace1)} // Disable button if no file is uploaded
+                  disabled={!(finalAudio1 && finalFace1) || isRendering1Loading || isRendering2Loading} // Disable button if no file is uploaded
                   onClick={handleApplyClick1}
                 >
                   Apply
@@ -245,8 +301,14 @@ const AnimateRenderScreen = () => {
                     fontWeight: 600,
                     textTransform: "none",
                     maxWidth: 100,
+                    "&.Mui-disabled": {
+                      backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                      color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                      borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                      opacity: 0.5
+                    },
                   }}
-                  disabled={!(finalAudio2 && finalFace2)}
+                  disabled={!(finalAudio2 && finalFace2) || isRendering1Loading || isRendering2Loading}
                   onClick={handleApplyClick2}
                 >
                   Apply

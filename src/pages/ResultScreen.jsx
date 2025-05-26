@@ -110,7 +110,7 @@ const ResultScreen = () => {
                 opacity: 0.5
               },
             }}
-            disabled={!(videoFile1 && videoFile2)}
+            disabled={!(videoFile1 && videoFile2) || isGeneratePodcastLoading}
             onClick={handleGenerate}
           >
             Generate

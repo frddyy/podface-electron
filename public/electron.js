@@ -129,7 +129,7 @@ ipcMain.on("separate-audio", (event, args) => {
   };
 
   // Run the separate_audio.py script
-  runPythonScript('separate_audio.py', options, "Audio separation completed", "Error executing audio separation:", event, (event) => {
+  runPythonScript('separate_audio.py', options, "Audio separation completed", "Error executing audio separation", event, (event) => {
     const separatedAudioPaths = {
       speaker1: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/speaker_1.wav',
       speaker2: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/speaker_2.wav',
@@ -152,7 +152,7 @@ function enhanceAudio(speaker1Path, speaker2Path, event) {
   };
 
   // Run the enhance_audio.py script
-  runPythonScript('enhance_audio.py', options, "Audio enhancement completed", "Error executing audio enhancement:", event, (event) => {
+  runPythonScript('enhance_audio.py', options, "Audio enhancement completed", "Error executing audio enhancement", event, (event) => {
     const enhancedAudioPaths = {
       enhancedSpeaker1: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_1.wav',
       enhancedSpeaker2: '/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_2.wav',
@@ -184,7 +184,7 @@ ipcMain.on("voice-conversion", (event, args) => {
   };
 
   // Menjalankan voice conversion dan memberikan feedback ke frontend
-  runPythonScript('inference.py', options, "Voice conversion completed successfully!", "Error during voice conversion:", event, (event) => {
+  runPythonScript('inference.py', options, "Voice conversion completed successfully!", "Error during voice conversion", event, (event) => {
     // Kirimkan path hasil konversi untuk speaker 1 dan speaker 2
     const convertedAudioPaths = {
       speaker1: speaker1Output,  // Path untuk speaker 1
@@ -218,7 +218,7 @@ ipcMain.on("run-mica", (event, args) => {
   };
 
   // Run the MICA face reconstruction Python script
-  runPythonScript("demo.py", options, "MICA processing completed successfully!", "Error during MICA processing:", event, (event) => {
+  runPythonScript("demo.py", options, "MICA processing completed successfully!", "Error during 3D face reconstruction processing", event, (event) => {
     console.log("MICA processing complete, starting postprocessing...");
 
     // Call the face postprocessing function after MICA completion
@@ -241,7 +241,7 @@ function runFacePostprocessing(event, outputFolder, speaker) {
     pythonOptions: ['-u'],
   };
 
-  runPythonScript('face_postprocessing.py', options, "Face postprocessing completed successfully!", "Error during face postprocessing:", event, () => {
+  runPythonScript('face_postprocessing.py', options, "Face postprocessing completed successfully!", "Error during face postprocessing", event, () => {
     console.log("Face postprocessing completed!");
     event.reply("face-postprocessing-complete", { message: "Face postprocessing completed!" });
   });
@@ -273,7 +273,7 @@ ipcMain.on("run-voca", (event, args) => {
   };
 
   // Run the VOCA script
-  runPythonScript('run_voca.py', options, "VOCA script executed successfully!", "Error executing VOCA script:", event, () => {
+  runPythonScript('run_voca.py', options, "VOCA script executed successfully!", "Error executing VOCA script", event, () => {
     // After VOCA completes, send a success message to the frontend
     console.log("VOCA processing completed!");
     event.reply("voca-processing-complete", { message: "VOCA script executed successfully!" });
@@ -305,7 +305,7 @@ function addEyeBlink(event, args) {
   };
 
   // Run the script to add eye blink to the animation
-  runPythonScript('edit_sequences.py', options, "Eye blink added successfully!", "Error adding eye blink:", event, () => {
+  runPythonScript('edit_sequences.py', options, "Eye blink added successfully!", "Error adding eye blink", event, () => {
     // After eye blink, visualize the animation sequence
     console.log("Add eye blink processing completed!");
     event.reply("add-eyeblink-processing-complete", { message: "Add eye blink script executed successfully!" });
@@ -332,7 +332,7 @@ function visualizeSequence(event, args) {
   };
 
   // Run the visualization script to render the final animation
-  runPythonScript('visualize_sequence.py', options, "3D facial animation completed!", "Error visualizing sequence:", event, () => {
+  runPythonScript('visualize_sequence.py', options, "3D facial animation completed!", "Error visualizing sequence", event, () => {
     event.reply("animation-complete", { message: "Facial animation with eye blink and visualization completed!" });
   });
 }

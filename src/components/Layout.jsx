@@ -19,7 +19,9 @@ const Layout = ({
 
   // Update activeTab when location changes
   useEffect(() => {
-    switch (location.pathname) {
+    const currentPath = window.location.pathname;
+
+    switch (currentPath) {
       case "/process-audio":
         setActiveTab(0);
         break;
@@ -95,7 +97,6 @@ const Layout = ({
               {/* Tabs */}
               <Tabs
                 value={activeTab}
-                onChange={(e, newValue) => setActiveTab(newValue)} // Change active tab
                 textColor="inherit"
                 indicatorColor="primary"
               >
