@@ -200,7 +200,7 @@ const AnimateRenderScreen = () => {
             </Box>
 
             <Box sx={{ marginTop: 2, display: "flex", justifyContent: "flex-end" }}>
-              {(finalAudio1?.path && finalFace1) && (
+              {(finalAudio1?.path && finalFace1) && !isRendering1Loading && !isRendering2Loading && (
                 <Button
                   variant="contained"
                   color="primary"
@@ -292,7 +292,7 @@ const AnimateRenderScreen = () => {
             </Box>
 
             <Box sx={{ marginTop: 2, display: "flex", justifyContent: "flex-end" }}>
-              {(finalAudio2?.path && finalFace2) && (
+              {(finalAudio2?.path && finalFace2) && !isRendering1Loading && !isRendering2Loading && (
                 <Button
                   variant="contained"
                   color="primary"

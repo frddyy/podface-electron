@@ -10,9 +10,7 @@ const ChooseFaceScreen = () => {
   const {
     isUseTemplate1, setIsUseTemplate1,
     isUseTemplate2, setIsUseTemplate2,
-    gender1, setGender1,
     template1, setTemplate1,
-    gender2, setGender2,
     template2, setTemplate2,
     imageFile1, setImageFile1,
     reconstructedFile1, setReconstructedFile1,
@@ -23,7 +21,7 @@ const ChooseFaceScreen = () => {
     setFinalFace,
     isReconstruction1Loading, setIsReconstruction1Loading,
     isReconstruction2Loading, setIsReconstruction2Loading
-  } = useFaceModelContext(); // Get context values and functions
+  } = useFaceModelContext();
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -36,16 +34,6 @@ const ChooseFaceScreen = () => {
 
   const handleSwitchChange2 = (event) => {
     setIsUseTemplate2(event.target.checked);
-  };
-
-  // Fungsi untuk menangani perubahan pada gender untuk Speaker 1
-  const handleGenderChange1 = (event) => {
-    setGender1(event.target.value);
-  };
-
-  // Fungsi untuk menangani perubahan pada gender untuk Speaker 2
-  const handleGenderChange2 = (event) => {
-    setGender2(event.target.value);
   };
 
   // Fungsi untuk menangani perubahan pada template 3D untuk Speaker 1
@@ -208,22 +196,25 @@ const ChooseFaceScreen = () => {
   // Set default 3D model path when the "Use Existing Template?" switch is on for Speaker 1
   useEffect(() => {
     if (isUseTemplate1) {
-      const modelPath = get3DModelPath(gender1, template1);
+      const modelPath = get3DModelPath(template1);
       setTemplateFile1({ path: modelPath });
     }
-  }, [isUseTemplate1, gender1, template1]);
+  }, [isUseTemplate1, template1]);
 
   // Set default 3D model path when the "Use Existing Template?" switch is on for Speaker 2
   useEffect(() => {
     if (isUseTemplate2) {
-      const modelPath = get3DModelPath(gender2, template2);
+      const modelPath = get3DModelPath(template2);
       setTemplateFile2({ path: modelPath });
     }
-  }, [isUseTemplate2, gender2, template2]);
+  }, [isUseTemplate2, template2]);
 
-  const get3DModelPath = (gender, template) => {
-    const basePath = `/home/daffaraihandika/TA/podface-electron/src/assets/meshes/${gender}`;
-    return `${basePath}/FLAME_sample_00${template}.ply`; // Construct the path based on the template
+  const get3DModelPath = (template) => {
+    const basePath = `/home/daffaraihandika/TA/podface-electron/src/assets/meshes`;
+    // Format nomor template menjadi 3 digit dengan nol di depan
+    const formattedTemplate = template.toString().padStart(3, '0');
+    
+    return `${basePath}/FLAME_sample_${formattedTemplate}.ply`;
   };
 
   const handleCloseSnackbar = () => {
@@ -289,35 +280,14 @@ const ChooseFaceScreen = () => {
         {isUseTemplate1 ? (
           <>            
             <Grid container alignItems="center" spacing={2}>
-              {/* Gender Selection with Toggle Button */}
-              <Grid item xs={6}>
-                <ToggleButtonGroup
-                  value={gender1}
-                  exclusive
-                  onChange={handleGenderChange1}
-                  aria-label="gender selection"
-                  sx={{
-                    "& .MuiToggleButton-root": {
-                      color: 'white', // White text color for both options
-                      border: `1px solid ${theme.palette.primary.main}`, // Border color for the buttons
-                    },
-                  }}
-                  fullWidth={false}
-                  size="small"
-                >
-                  <ToggleButton value="male" color="primary">Male</ToggleButton>
-                  <ToggleButton value="female" color="primary">Female</ToggleButton>
-                </ToggleButtonGroup>
-              </Grid>
-
               {/* 3D Face Template Selection */}
-              <Grid item xs={6}>
+              <Grid item xs={12}>
                 <RadioGroup
                   row
                   value={template1}
                   onChange={handleTemplateChange1}
                 >
-                  {[1, 2, 3, 4, 5].map((temp) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((temp) => (
                     <FormControlLabel
                       key={temp}
                       value={temp.toString()}
@@ -376,27 +346,29 @@ const ChooseFaceScreen = () => {
             </Grid>
 
             {/* Button Apply below the image and 3D model */}
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{
-                fontWeight: 600,
-                textTransform: "none",
-                maxWidth: 100,
-                alignSelf: "flex-end", // Align to the right
-                marginTop: 2, // Optional: space between components
-                "&.Mui-disabled": {
-                  backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
-                  color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
-                  borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
-                  opacity: 0.5
-                },
-              }}
-              disabled={!imageFile1 || isReconstruction1Loading || isReconstruction2Loading}
-              onClick={handleApplyClick1}
-            >
-              Apply
-            </Button>
+            {!isReconstruction1Loading && !isReconstruction2Loading && (
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{
+                  fontWeight: 600,
+                  textTransform: "none",
+                  maxWidth: 100,
+                  alignSelf: "flex-end", // Align to the right
+                  marginTop: 2, // Optional: space between components
+                  "&.Mui-disabled": {
+                    backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                    color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                    borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                    opacity: 0.5
+                  },
+                }}
+                disabled={!imageFile1 || isReconstruction1Loading || isReconstruction2Loading}
+                onClick={handleApplyClick1}
+              >
+                Apply
+              </Button>
+            )}
           </>
         )}
       </Grid>
@@ -455,35 +427,14 @@ const ChooseFaceScreen = () => {
         {isUseTemplate2 ? (
           <>            
             <Grid container alignItems="center" spacing={2}>
-              {/* Gender Selection with Toggle Button */}
-              <Grid item xs={6}>
-                <ToggleButtonGroup
-                  value={gender2}
-                  exclusive
-                  onChange={handleGenderChange2}
-                  aria-label="gender selection"
-                  sx={{
-                    "& .MuiToggleButton-root": {
-                      color: 'white', // White text color for both options
-                      border: `1px solid ${theme.palette.primary.main}`, // Border color for the buttons
-                    },
-                  }}
-                  fullWidth={false}
-                  size="small"
-                >
-                  <ToggleButton value="male" color="primary">Male</ToggleButton>
-                  <ToggleButton value="female" color="primary">Female</ToggleButton>
-                </ToggleButtonGroup>
-              </Grid>
-
               {/* 3D Face Template Selection */}
-              <Grid item xs={6}>
+              <Grid item xs={12}>
                 <RadioGroup
                   row
                   value={template2}
                   onChange={handleTemplateChange2}
                 >
-                  {[1, 2, 3, 4, 5].map((temp) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((temp) => (
                     <FormControlLabel
                       key={temp}
                       value={temp.toString()}
@@ -541,27 +492,29 @@ const ChooseFaceScreen = () => {
             </Grid>
 
             {/* Button Apply below the image and 3D model */}
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{
-                fontWeight: 600,
-                textTransform: "none",
-                maxWidth: 100,
-                alignSelf: "flex-end", // Align to the right
-                marginTop: 2, // Optional: space between components
-                "&.Mui-disabled": {
-                  backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
-                  color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
-                  borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
-                  opacity: 0.5
-                },
-              }}
-              disabled={!imageFile2 || isReconstruction1Loading || isReconstruction2Loading}
-              onClick={handleApplyClick2}
-            >
-              Apply
-            </Button>
+            {!isReconstruction1Loading && !isReconstruction2Loading && (
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{
+                  fontWeight: 600,
+                  textTransform: "none",
+                  maxWidth: 100,
+                  alignSelf: "flex-end", // Align to the right
+                  marginTop: 2, // Optional: space between components
+                  "&.Mui-disabled": {
+                    backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                    color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                    borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                    opacity: 0.5
+                  },
+                }}
+                disabled={!imageFile2 || isReconstruction1Loading || isReconstruction2Loading}
+                onClick={handleApplyClick2}
+              >
+                Apply
+              </Button>
+            )}
           </>
         )}
       </Grid>

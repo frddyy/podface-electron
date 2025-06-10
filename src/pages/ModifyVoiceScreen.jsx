@@ -246,7 +246,7 @@ const ModifyVoiceScreen = () => {
           )}
 
           {/* Apply Button for Speaker 1 */}
-          {isConvertVoice1 && (
+          {isConvertVoice1 && !isConvertion1Loading && !isConvertion2Loading && (
             <Button
               variant={fileAudioReference1 ? "contained" : "outlined"} // Change the variant based on file state
               color="primary"
@@ -359,7 +359,7 @@ const ModifyVoiceScreen = () => {
           )}
 
           {/* Apply Button for Speaker 2 */}
-          {isConvertVoice2 && (
+          {isConvertVoice2 && !isConvertion1Loading && !isConvertion2Loading && (
             <Button
               variant={fileAudioReference2 ? "contained" : "outlined"} // Change the variant based on file state
               color="primary"

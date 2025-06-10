@@ -121,26 +121,28 @@ const ProcessAudioScreen = () => {
           onOpenFileDialog={handleOpenFileDialog} // Pass the handler for opening file dialog
         />
         
-        <Button
-          variant={fileAudioPodcast ? "contained" : "outlined"} // Change the variant based on file state
-          color="primary"
-          sx={{
-            fontWeight: 600,
-            textTransform: "none",
-            maxWidth: 100,
-            alignSelf: "flex-end",
-            "&.Mui-disabled": {
-              backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
-              color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
-              borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
-              opacity: 0.5
-            },
-          }}
-          disabled={!fileAudioPodcast} // Disable button if no file is uploaded
-          onClick={handleApplyClick}
-        >
-          Apply
-        </Button>
+        {!isSeparationLoading && (
+          <Button
+            variant={fileAudioPodcast ? "contained" : "outlined"} // Change the variant based on file state
+            color="primary"
+            sx={{
+              fontWeight: 600,
+              textTransform: "none",
+              maxWidth: 100,
+              alignSelf: "flex-end",
+              "&.Mui-disabled": {
+                backgroundColor: theme.palette.background.form, // Ganti dengan warna latar belakang saat disabled
+                color: theme.palette.neutral.dark, // Ganti dengan warna teks saat disabled
+                borderColor: theme.palette.neutral.dark, // Ganti warna border saat disabled
+                opacity: 0.5
+              },
+            }}
+            disabled={!fileAudioPodcast} // Disable button if no file is uploaded
+            onClick={handleApplyClick}
+          >
+            Apply
+          </Button>
+        )}
       </Grid>
 
       {/* Divider with white color */}

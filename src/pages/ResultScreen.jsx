@@ -93,7 +93,7 @@ const ResultScreen = () => {
       </Box>
 
       {/* Additional styling or content can be added here */}
-      {!isPodcastMerged && (
+      {!isPodcastMerged && !isGeneratePodcastLoading && (
         <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 7 }}>
           <Button
             variant="contained"

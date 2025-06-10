@@ -8,10 +8,7 @@ export const FaceModelProvider = ({ children }) => {
   const [isUseTemplate1, setIsUseTemplate1] = useState(false); // Status template untuk Speaker 1
   const [isUseTemplate2, setIsUseTemplate2] = useState(false); // Status template untuk Speaker 2
   
-  const [gender1, setGender1] = useState("male");
   const [template1, setTemplate1] = useState(1);
-
-  const [gender2, setGender2] = useState("female");
   const [template2, setTemplate2] = useState(1);
 
   const [imageFile1, setImageFile1] = useState(null); // Image untuk Speaker 1
@@ -53,12 +50,8 @@ export const FaceModelProvider = ({ children }) => {
         setIsUseTemplate1,
         isUseTemplate2,
         setIsUseTemplate2,
-        gender1,
-        setGender1,
         template1,
         setTemplate1,
-        gender2,
-        setGender2,
         template2,
         setTemplate2,
         imageFile1,
