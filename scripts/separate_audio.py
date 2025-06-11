@@ -10,6 +10,11 @@ from utils import is_valid_wav_file
 output_folder = './speechbrain/output' # speechbrain/output
 os.makedirs(output_folder, exist_ok=True)  # Create folder if it doesn't exist
 
+def report_progress(percentage):
+    """Fungsi untuk mengirim progres dan melakukan flush."""
+    print(f"PROGRESS:{percentage}")
+    sys.stdout.flush()
+
 # Function for separating audio into multiple speakers
 def separate_audio(audio_path, output_folder):
     # Validate the WAV file before processing
@@ -18,6 +23,7 @@ def separate_audio(audio_path, output_folder):
         return None, None
 
     # Load the audio file using torchaudio
+    report_progress(5) # Tahap 1: Memulai pemisahan
     waveform, sample_rate = torchaudio.load(audio_path)
 
     # Resample to 8kHz if the sample rate is different
@@ -34,12 +40,15 @@ def separate_audio(audio_path, output_folder):
     torchaudio.save(resampled_audio_path, waveform, sample_rate)
 
     # Initialize the Sepformer model for separation
+    report_progress(15) # Tahap 2: Memuat model
     model = separator.from_hparams(source="speechbrain/sepformer-wham", savedir='pretrained_models/sepformer-wham')
 
     # Perform the separation
+    report_progress(30) # Tahap 3: Memproses pemisahan audio
     est_sources = model.separate_file(path=resampled_audio_path)
 
     # Save separated audio for each speaker
+    report_progress(45) # Tahap 4: Menyimpan hasil
     rate = 8000  # Sampling rate
     speaker_1 = est_sources[:, :, 0].detach().cpu().squeeze().numpy()
     speaker_2 = est_sources[:, :, 1].detach().cpu().squeeze().numpy()
@@ -48,9 +57,6 @@ def separate_audio(audio_path, output_folder):
     write(os.path.join(output_folder, "speaker_2.wav"), rate, (speaker_2 * 32767).astype('int16'))
 
     print("Speech separation completed successfully!")
-    print(f"- speaker_1.wav")
-    print(f"- speaker_2.wav")
-    
     return os.path.join(output_folder, "speaker_1.wav"), os.path.join(output_folder, "speaker_2.wav")
 
 if __name__ == "__main__":

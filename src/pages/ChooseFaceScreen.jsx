@@ -26,6 +26,21 @@ const ChooseFaceScreen = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const { ipcRenderer } = window.require("electron");
+
+    const handleProgressUpdate = (event, { percentage }) => {
+      setProgress(percentage);
+    };
+
+    ipcRenderer.on('processing-progress', handleProgressUpdate);
+
+    return () => {
+      ipcRenderer.removeListener('processing-progress', handleProgressUpdate);
+    };
+  }, []);
 
   // Fungsi untuk menangani perubahan pada switch
   const handleSwitchChange1 = (event) => {
@@ -79,6 +94,7 @@ const ChooseFaceScreen = () => {
     }
 
     setIsReconstruction1Loading(true)
+    setProgress(0);
   
     const imageFolder = imageFile1.path; 
     const outputFolder = "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/";
@@ -153,6 +169,7 @@ const ChooseFaceScreen = () => {
     }
   
     setIsReconstruction2Loading(true)
+    setProgress(0);
 
     const imageFolder = imageFile2.path; 
     const outputFolder = "/home/daffaraihandika/TA/podface-electron/src/assets/meshes/";
@@ -340,6 +357,7 @@ const ChooseFaceScreen = () => {
                     setFile={setReconstructedFile1}
                     isPreview={true} // Show preview
                     isLoading={isReconstruction1Loading}
+                    progress={progress}
                   />
                 )}
               </Grid>
@@ -486,6 +504,7 @@ const ChooseFaceScreen = () => {
                     setFile={setReconstructedFile2}
                     isPreview={true} // Show preview
                     isLoading={isReconstruction2Loading}
+                    progress={progress}
                   />
                 )}
               </Grid>

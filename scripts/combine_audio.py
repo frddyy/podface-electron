@@ -1,8 +1,13 @@
 from pydub import AudioSegment
 import sys
 
+def report_progress(percentage):
+    print(f"PROGRESS:{percentage}")
+    sys.stdout.flush()
+
 def combine_audio(audio_file1, audio_file2, output_file):
     # Load audio files
+    report_progress(5)
     audio1 = AudioSegment.from_file(audio_file1)
     audio2 = AudioSegment.from_file(audio_file2)
 
@@ -16,6 +21,7 @@ def combine_audio(audio_file1, audio_file2, output_file):
     combined_audio = audio1.overlay(audio2)
 
     # Export the combined audio to the specified output file
+    report_progress(10)
     combined_audio.export(output_file, format="wav")
 
     print(f"Audio successfully combined and saved to {output_file}")

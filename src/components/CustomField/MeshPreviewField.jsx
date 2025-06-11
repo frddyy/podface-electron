@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { MoodOutlined } from "@mui/icons-material"; // Icon fallback
 import { useTheme } from "@mui/material/styles";
 import { Canvas } from "@react-three/fiber";
@@ -7,13 +7,27 @@ import { OrbitControls, Environment, Loader } from "@react-three/drei";
 import * as THREE from 'three';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader';
 
-const MeshPreviewField = ({ file, isLoading }) => {
+const MeshPreviewField = ({ file, isLoading, progress }) => {
   const theme = useTheme();
   const [model, setModel] = useState(null);
 
   // Validasi file yang diterima
   const isValidFile = file && typeof file.path === "string";
   const fileUrl = isValidFile ? `file://${file.path}` : null;
+
+  const boxStyles = {
+    width: "100",
+    height: "100",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "1px solid",
+    padding: "70px 120px",
+    borderRadius: theme.shape.borderRadius,
+    borderColor: theme.palette.neutral.dark,
+    color: theme.palette.neutral.dark,
+    backgroundColor: theme.palette.background.form,
+  }
 
   // Menangani proses pemuatan model
   useEffect(() => {
@@ -44,40 +58,27 @@ const MeshPreviewField = ({ file, isLoading }) => {
     <div style={{ width: "100%", height: "300px" }}>
       {/* Conditional rendering for loading */}
       {isLoading ? (
-        <Box
-          sx={{
-            width: "100",
-            height: "100",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "1px solid",
-            padding: "70px 120px",
-            borderRadius: theme.shape.borderRadius,
-            borderColor: theme.palette.neutral.dark,
-            color: theme.palette.neutral.dark,
-            backgroundColor: theme.palette.background.form,
-          }}
-        >
-          <CircularProgress />
+        <Box sx={boxStyles}>
+          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+            <CircularProgress variant="determinate" value={progress} />
+            <Box
+              sx={{
+                top: 0, left: 0, bottom: 0, right: 0,
+                position: 'absolute',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography variant="caption" component="div" color="white">
+                {`${Math.round(progress)}%`}
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       ) : !isValidFile ? (
         // Show fallback error icon if loading failed
-        <Box
-          sx={{
-            width: "100",
-            height: "100",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "1px solid",
-            padding: "70px 120px",
-            borderRadius: theme.shape.borderRadius,
-            borderColor: theme.palette.neutral.dark,
-            color: theme.palette.neutral.dark,
-            backgroundColor: theme.palette.background.form,
-          }}
-        >
+        <Box sx={boxStyles}>
           <MoodOutlined />
         </Box>
       ) : (

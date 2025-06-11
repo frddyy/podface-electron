@@ -20,6 +20,7 @@ const CustomField = ({
   onOpenFileDialog,
   hideRemoveButton = false,
   isLoading = false,
+  progress = 0,
 }) => {
   const theme = useTheme();
   const { setSeparatedAudioFiles, separatedAudioFiles } = useAudioContext(); // Ambil context dari AudioContext
@@ -99,13 +100,13 @@ const CustomField = ({
       {isPreview ? (
         // Check for the mode and show the correct preview field
         mode === "audio" ? (
-          <AudioPreviewField file={file} isLoading={isLoading} />
+          <AudioPreviewField file={file} isLoading={isLoading} progress={progress} />
         ) : mode === "image" ? (
           <ImagePreviewField file={file} />
         ) : mode === "video" ? (
-          <VideoPreviewField file={file} isLoading={isLoading} />
+          <VideoPreviewField file={file} isLoading={isLoading} progress={progress} />
         ) : mode === "3d" ? (
-          <MeshPreviewField file={file} isLoading={isLoading} />
+          <MeshPreviewField file={file} isLoading={isLoading} progress={progress} />
         ) : null
       ) : (
         // Show upload field if file isn't uploaded yet

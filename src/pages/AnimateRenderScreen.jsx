@@ -16,6 +16,21 @@ const AnimateRenderScreen = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const { ipcRenderer } = window.require("electron");
+
+    const handleProgressUpdate = (event, { percentage }) => {
+      setProgress(percentage);
+    };
+
+    ipcRenderer.on('processing-progress', handleProgressUpdate);
+
+    return () => {
+      ipcRenderer.removeListener('processing-progress', handleProgressUpdate);
+    };
+  }, []);
 
   const handleApplyClick1 = () => {
     console.log("Running VOCA for Speaker 1...");
@@ -24,6 +39,7 @@ const AnimateRenderScreen = () => {
 
     setIsRendering1Loading(true);
     setIsSpeaker1Rendered(true);
+    setProgress(0);
   
     // Define the paths for VOCA arguments
     const audioPath = finalAudio1.path;
@@ -82,6 +98,7 @@ const AnimateRenderScreen = () => {
 
     setIsRendering2Loading(true);
     setIsSpeaker2Rendered(true);
+    setProgress(0);
   
     // Define the paths for VOCA arguments
     const audioPath = finalAudio2.path;
@@ -234,6 +251,7 @@ const AnimateRenderScreen = () => {
             setFile={setVideoFile1} // Set function can be empty as this is for video render placeholder
             isPreview={true} // Show video for preview before rendering
             isLoading={isRendering1Loading} // Show loading spinner when rendering
+            progress={progress}
           />
         )}
       </Grid>
@@ -327,6 +345,7 @@ const AnimateRenderScreen = () => {
               setFile={setVideoFile2} // Set function can be empty as this is for video render placeholder
               isPreview={true} // Show video for preview before rendering
               isLoading={isRendering2Loading}
+              progress={progress}
             />
           </Box>
         )}  

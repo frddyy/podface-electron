@@ -22,6 +22,21 @@ const ModifyVoiceScreen = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const { ipcRenderer } = window.require("electron");
+
+    const handleProgressUpdate = (event, { percentage }) => {
+      setProgress(percentage);
+    };
+
+    ipcRenderer.on('processing-progress', handleProgressUpdate);
+
+    return () => {
+      ipcRenderer.removeListener('processing-progress', handleProgressUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     console.log("separatedAudioFiles:", separatedAudioFiles);
@@ -83,6 +98,7 @@ const ModifyVoiceScreen = () => {
       const { ipcRenderer } = window.require("electron");
 
       setIsConvertion1Loading(true);
+      setProgress(0);
 
       // Path input (enhanced speaker audio) and target audio (from file dialog)
       const inputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_1.wav"; 
@@ -126,6 +142,7 @@ const ModifyVoiceScreen = () => {
       const { ipcRenderer } = window.require("electron");
 
       setIsConvertion2Loading(true)
+      setProgress(0);
 
       // Path input (enhanced speaker audio) and target audio (from file dialog)
       const inputAudioPath = "/home/daffaraihandika/TA/podface-electron/speechbrain/output/enhanced_speaker_2.wav"; 
@@ -156,7 +173,7 @@ const ModifyVoiceScreen = () => {
         setSnackbarMessage(`Error during voice conversion: ${data.error}`);
         setSnackbarSeverity("error");
         setSnackbarOpen(true);
-        setIsConvertion1Loading(false);
+        setIsConvertion2Loading(false);
       });
     }
   };
@@ -279,6 +296,7 @@ const ModifyVoiceScreen = () => {
               setFile={setConvertedFile1}
               isPreview={true} // Set to true for preview
               isLoading={isConvertion1Loading}
+              progress={progress}
             />
           )}
         </Grid>
@@ -392,6 +410,7 @@ const ModifyVoiceScreen = () => {
               setFile={setConvertedFile2}
               isPreview={true} // Set to true for preview
               isLoading={isConvertion2Loading}
+              progress={progress}
             />
           )}
         </Grid>

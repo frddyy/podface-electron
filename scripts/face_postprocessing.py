@@ -1,6 +1,10 @@
 import trimesh
 import sys
 
+def report_progress(percentage):
+    print(f"PROGRESS:{percentage}")
+    sys.stdout.flush()
+
 def face_postprocessing(mica_mesh_path, aligned_mesh_path):
     
     # Tentukan nilai scaling dan translasi secara default di dalam fungsi
@@ -9,6 +13,7 @@ def face_postprocessing(mica_mesh_path, aligned_mesh_path):
 
     try:
         # Muat mesh dari MICA
+        report_progress(85)
         mica_mesh = trimesh.load(mica_mesh_path)
         print("Mesh loaded successfully from MICA!")
 
@@ -26,6 +31,7 @@ def face_postprocessing(mica_mesh_path, aligned_mesh_path):
         simple_mesh.vertices[:, 1] += translation_y  # Translasi pada sumbu Y (kolom ke-2 dari vertices)
 
         # Simpan file mesh baru
+        report_progress(95)
         simple_mesh.export(aligned_mesh_path, file_type='ply')
         print(f"Scaled and translated mesh saved to: {aligned_mesh_path}")
 

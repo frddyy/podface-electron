@@ -9,8 +9,23 @@ const ProcessAudioScreen = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [progress, setProgress] = useState(0);
   const theme = useTheme();
 
+  useEffect(() => {
+    const { ipcRenderer } = window.require("electron");
+  
+    const handleProgressUpdate = (event, { percentage }) => {
+      setProgress(percentage);
+    };
+  
+    ipcRenderer.on('processing-progress', handleProgressUpdate);
+  
+    return () => {
+      ipcRenderer.removeListener('processing-progress', handleProgressUpdate);
+    };
+  }, []);
+  
   useEffect(() => {
       console.log("Separated Audio Files:", separatedAudioFiles);
     }, [separatedAudioFiles]); 
@@ -43,6 +58,7 @@ const ProcessAudioScreen = () => {
       console.log("audioPath: ", audioPath);
 
       setIsSeparationLoading(true);
+      setProgress(0);
 
       const { ipcRenderer } = window.require("electron");
 
@@ -178,6 +194,7 @@ const ProcessAudioScreen = () => {
               setFile={setSeparatedAudioFiles}
               isPreview={true} // Show preview section after file is uploaded
               isLoading={isSeparationLoading}
+              progress={progress}
               sx={{ marginBottom: 2 }} // Add space between speakers
             />
         </Box>
@@ -190,6 +207,7 @@ const ProcessAudioScreen = () => {
               setFile={setSeparatedAudioFiles}
               isPreview={true} // Show preview section after file is uploaded
               isLoading={isSeparationLoading}
+              progress={progress}
             />
         </Box>
       </Grid>

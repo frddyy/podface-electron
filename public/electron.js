@@ -138,7 +138,7 @@ ipcMain.on("separate-audio", (event, args) => {
     
     // Now call the enhanceAudio function after separation
     enhanceAudio(separatedAudioPaths.speaker1, separatedAudioPaths.speaker2, event);
-  });
+  }, false);
 });
 
 // Function to enhance audio
@@ -159,7 +159,7 @@ function enhanceAudio(speaker1Path, speaker2Path, event) {
     };
     // Send the paths of the enhanced audio to the renderer
     event.reply('audio-enhancement-complete', enhancedAudioPaths);
-  });
+  }, true);
 }
 
 // Fungsi untuk menjalankan voice conversion menggunakan Seed-VC
@@ -223,7 +223,7 @@ ipcMain.on("run-mica", (event, args) => {
 
     // Call the face postprocessing function after MICA completion
     runFacePostprocessing(event, outputFolder, speaker);  // Pass event, outputFolder, and speaker to face postprocessing
-  });
+  }, false);
 });
 
 // Fungsi untuk menjalankan face postprocessing
@@ -244,7 +244,7 @@ function runFacePostprocessing(event, outputFolder, speaker) {
   runPythonScript('face_postprocessing.py', options, "Face postprocessing completed successfully!", "Error during face postprocessing", event, () => {
     console.log("Face postprocessing completed!");
     event.reply("face-postprocessing-complete", { message: "Face postprocessing completed!" });
-  });
+  }, true);
 }
 
 // Handle the "run-voca" event for speech-driven facial animation
@@ -278,7 +278,7 @@ ipcMain.on("run-voca", (event, args) => {
     console.log("VOCA processing completed!");
     event.reply("voca-processing-complete", { message: "VOCA script executed successfully!" });
     addEyeBlink(event, args)
-  });
+  }, false);
 });
 
 // Step 2: Add eye blink to the animation
@@ -310,7 +310,7 @@ function addEyeBlink(event, args) {
     console.log("Add eye blink processing completed!");
     event.reply("add-eyeblink-processing-complete", { message: "Add eye blink script executed successfully!" });
     visualizeSequence(event, args);
-  });
+  }, false);
 }
 
 // Step 3: Visualize the sequence (render the animation)
@@ -334,7 +334,7 @@ function visualizeSequence(event, args) {
   // Run the visualization script to render the final animation
   runPythonScript('visualize_sequence.py', options, "3D facial animation completed!", "Error visualizing sequence", event, () => {
     event.reply("animation-complete", { message: "Facial animation with eye blink and visualization completed!" });
-  });
+  }, true);
 }
 
 // Menangani permintaan untuk menggabungkan dua file audio
@@ -351,7 +351,7 @@ ipcMain.on("combine-audio", (event, args) => {
 
   runPythonScript("combine_audio.py", options, "Audio successfully combined", "Error combining audio:", event, (event) => {
     event.reply("audio-combined", { message: "Audio combined script executed successfully!" });  // Kirimkan path file hasil gabungan
-  });
+  }, false);
 });
 
 // Fungsi untuk menggabungkan video dan audio menjadi podcast
@@ -359,6 +359,12 @@ ipcMain.on("merge-podcasts", (event, args) => {
   console.log("Merging podcasts...");
 
   const { video1Path, video2Path, audioPath, outputPath } = args;
+
+  const sendProgress = (percentage) => {
+    if (mainWindow) {
+      mainWindow.webContents.send('processing-progress', { percentage: Math.round(percentage) });
+    }
+  };
 
   // Membuat instance ffmpeg untuk penggabungan video
   let mergedVideo = ffmpeg();
@@ -379,12 +385,19 @@ ipcMain.on("merge-podcasts", (event, args) => {
     ])
     .outputOptions('-map', '[v]')  // Menyimpan video hasil gabungan
     .output(tempMergedVideoPath)  // Menyimpan output sementara
+    .on('progress', (progress) => {
+      if (progress.percent) {
+        const overallProgress = 10 + (progress.percent * 0.70);
+        sendProgress(overallProgress);
+      }
+    })
     .on('error', (err) => {
       console.log('Error merging videos: ' + err.message);
       event.reply("podcast-merged", { error: err.message });
     })
     .on('end', () => {
       console.log('Videos merged successfully!');
+      sendProgress(80);
 
       // Sekarang tambahkan audio ke video yang sudah digabungkan
       ffmpeg(tempMergedVideoPath)
@@ -393,12 +406,19 @@ ipcMain.on("merge-podcasts", (event, args) => {
         .outputOptions('-map', '1:a')  // Menggunakan audio
         .outputOptions('-c:v', 'copy')  // Menyalin video stream tanpa perubahan
         .outputOptions('-shortest')  // Memastikan durasi audio dan video sama
+        .on('progress', (progress) => {
+           if (progress.percent) {
+             const overallProgress = 80 + (progress.percent * 0.20);
+             sendProgress(overallProgress);
+           }
+        })
         .on('error', (err) => {
           console.error('Error adding audio to video:', err);
           event.reply("podcast-merged", { error: err.message });
         })
         .on('end', () => {
           console.log('Final podcast video created successfully.');
+          sendProgress(100);
           // Setelah audio ditambahkan, simpan ke output final
           event.reply("podcast-merged", { output: outputPath });
         })
@@ -408,22 +428,40 @@ ipcMain.on("merge-podcasts", (event, args) => {
 });
 
 // Function to run the Python script and send feedback to the frontend
-function runPythonScript(scriptName, options, successMessage, errorMessage, event, nextFunction) {
+function runPythonScript(scriptName, options, successMessage, errorMessage, event, nextFunction, isFinalStep = true) {
   const pyshell = new PythonShell(scriptName, options);
 
   // Capture real-time logs from the Python script
   pyshell.on('message', (message) => {
-    console.log(message);  // Log real-time output in the terminal
+    console.log(message);
+
+    if (message.startsWith('PROGRESS:')) {
+      try {
+        const percentage = parseInt(message.split(':')[1], 10);
+        if (mainWindow) {
+          mainWindow.webContents.send('processing-progress', { percentage });
+        }
+      } catch (e) {
+        console.error('Failed to parse progress message:', message, e);
+      }
+    }
   });
 
   // Handle Python script results
   pyshell.end((err, code, signal) => {
     if (err) {
       console.error(errorMessage, err);
+      // Set progres ke 100 dengan status error jika ada
+      if (mainWindow) {
+        mainWindow.webContents.send('processing-progress', { percentage: 100, error: true });
+      }
       event.reply(errorMessage, { error: err.message });
     } else {
       console.log(successMessage);
-      // Send the success message to the frontend
+      // Set progres ke 100 saat sukses
+      if (isFinalStep && mainWindow) {
+        mainWindow.webContents.send('processing-progress', { percentage: 100 });
+      }
       event.reply("feedback", { message: successMessage });
 
       // Call the next function (if any) after processing

@@ -13,8 +13,20 @@ const ResultScreen = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);  
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [progress, setProgress] = useState(0);
 
   const theme = useTheme();
+
+  useEffect(() => {
+    const { ipcRenderer } = window.require("electron");
+    const handleProgressUpdate = (event, { percentage }) => {
+      setProgress(percentage);
+    };
+    ipcRenderer.on('processing-progress', handleProgressUpdate);
+    return () => {
+      ipcRenderer.removeListener('processing-progress', handleProgressUpdate);
+    };
+  }, []);
 
   const handleGenerate = () => {
     console.log("Starting to generate podcast...");
@@ -26,6 +38,7 @@ const ResultScreen = () => {
     const outputPath = "/home/daffaraihandika/TA/podface-electron/src/assets/video/final_podcast.mp4";
 
     setIsGeneratePodcastLoading(true);
+    setProgress(0);
 
     // Menggabungkan audio
     ipcRenderer.send("combine-audio", {
@@ -89,6 +102,7 @@ const ResultScreen = () => {
           file={videoPodcastFile}
           setFile={setVideoPodcastFile}
           isLoading={isGeneratePodcastLoading}
+          progress={progress}
         />
       </Box>
 
